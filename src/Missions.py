@@ -9,6 +9,23 @@ class Orbit:
 		self.a_alt = a_alt
 		self.i = inc
 
+# mission methods
+
+def transfer_to(self, target_Body, final_P_Alt, final_A_Alt):
+	logic = (target_Body not in self.current_body.children) and (target_Body is not self.current_body.parent)
+	if self._break_check(logic, "Failure", "transfer_to()", f'Cannot transfer to {target_Body.name} from {self.current_body.name}. Mission construction aborted!', True):
+		return
+
+	if self.catch(self.orbits[-1].r_p != self.orbits[-1].r_a, "Warning", "transfer_to()", f'Transfer orbit assumes initial orbit is circular. Added circularization maneuver to {self.orbits[-1].r_a}m.'):
+		self.add_change_orbit(self.orbits[-1].r_a, self.orbits[-1].r_a, self.orbits[-1].i)
+
+	# Refactor self.add_change_orbit to defualt to current inclinationn if none is specified
+
+	if target_Body in self.current_body.children:
+		
+	
+
+
 
 class Mission:
 	def __init__(self, mission_name="Unnamed Mission", starting_body="Kerbin"):
