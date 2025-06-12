@@ -12,8 +12,8 @@ class Orbit:
 # mission methods
 
 def transfer_to(self, target, final_P_Alt, final_A_Alt):
-	logic = (target_Body not in self.current_body.children) and (target_Body is not self.current_body.parent)
-	if self._break_check(logic, "Failure", "transfer_to()", f'Cannot transfer to {target_Body.name} from {self.current_body.name}. Mission construction aborted!', True):
+	logic = (target not in self.current_body.children) and (target is not self.current_body.parent)
+	if self._break_check(logic, "Failure", "transfer_to()", f'Cannot transfer to {target.name} from {self.current_body.name}. Mission construction aborted!', True):
 		return
 
 	if self.catch(self.orbits[-1].r_p != self.orbits[-1].r_a, "Warning", "transfer_to()", f'Transfer orbit assumes initial orbit is circular. Added circularization maneuver to {self.orbits[-1].r_a}m.'):
