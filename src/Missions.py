@@ -16,6 +16,64 @@ class Orbit:
 		self.a_alt = a_alt
 		self.i = inc
 
+# mission methods
+
+def transfer_to(self, target, final_P_Alt, final_A_Alt):
+	logic = (target not in self.current_body.children) and (target is not self.current_body.parent)
+	if self._break_check(logic, "Failure", "transfer_to()", f'Cannot transfer to {target.name} from {self.current_body.name}. Mission construction aborted!', True):
+		return
+
+	if self.catch(self.orbits[-1].r_p != self.orbits[-1].r_a, "Warning", "transfer_to()", f'Transfer orbit assumes initial orbit is circular. Added circularization maneuver to {self.orbits[-1].r_a}m.'):
+		self.add_change_orbit(self.orbits[-1].r_a, self.orbits[-1].r_a, self.orbits[-1].i)
+
+	# Refactor self.add_change_orbit to defualt to current inclinationn if none is specified
+
+	initial_Body = self.current_body()
+	target_Body = target()
+	initial_Alt = self.orbits[-1].a
+
+	if self.current_body is target_Body.parent:
+		initial_Rad = initial_Body.radius + initial_Alt
+		final_P_Rad = target_Body.radius + final_P_Alt
+		final_A_Rad = target_Body.radius + final_A_Alt
+
+		vis, viva, hohmann_v = self.hohmann_transfer(target_Body().a)
+		transfer = vis
+		
+		hyperbolic_v_p = pow(
+			pow(viva, 2) - 2 * target_Body.mu * (1 / target_Body.SOI - 1 / final_P_Rad), 0.5)
+
+		elliptical_v = pow(
+			target_Body.mu * (2 / final_P_Rad - 2 / (final_P_Rad + final_A_Rad)), 0.5)
+		
+		capture_cost = hyperbolic_v_p - elliptical_v
+		delta_v = self.transfer_cost + self.capture_cost
+		
+	elif target is self.current_body().parent:
+		initial_Rad = initial_Body.radius + initial_Alt
+		final_P_Rad = target_Body.radius + final_P_Alt
+
+		v1 = pow(initial_Body.mu / initial_Rad, 0.5)
+		a = (initial_Body.a + final_P_Rad) / 2
+		v_a = pow(target_Body.mu * (2 / initial_Body.a - 1 / a), 0.5)
+		v = pow(target_Body.mu / initial_Body.a, 0.5)
+		leaving_v = v - v_a
+		v_e = pow(pow(leaving_v, 2) + 2 * initial_Body.mu * (1 / initial_Rad - 1 / initial_Body.SOI), 0.5)
+
+		delta_v = v_e - v1
+
+	
+class LKO(mission):
+	def __init__(self, mission_name="Low Kerbin Orbit", starting_body=Kerbin):
+		super().__init__(mission_name, starting_body)
+		self.add_launch(80_000)
+
+class Low_Minmus_Orbit(mission):
+	def __init__(self, mission_name="Low Minmus Orbit", starting_body=Kerbin):
+		super().__init__(mission_name, starting_body)
+		self.add_launch(80_000)
+		self.add_transfer(Minmus, 14_000, 14_000)
+
 
 class Maneuver:
 	def __init__(self, name, delta_v):
