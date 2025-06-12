@@ -55,6 +55,18 @@ def transfer_to(self, target, final_P_Alt, final_A_Alt):
 
 		delta_v = v_e - v1
 
+	
+class LKO(mission):
+	def __init__(self, mission_name="Low Kerbin Orbit", starting_body=Kerbin):
+		super().__init__(mission_name, starting_body)
+		self.add_launch(80_000)
+
+class Low_Minmus_Orbit(mission):
+	def __init__(self, mission_name="Low Minmus Orbit", starting_body=Kerbin):
+		super().__init__(mission_name, starting_body)
+		self.add_launch(80_000)
+		self.add_transfer(Minmus, 14_000, 14_000)
+
 
 class Mission:
 	def __init__(self, mission_name="Unnamed Mission", starting_body="Kerbin"):
