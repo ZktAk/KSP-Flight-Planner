@@ -80,6 +80,7 @@ class Mun():
 		self.parent = Kerbin
 		parent = self.parent()
 		self.name = "The Mun"
+		self.children = []
 
 		# Physical properties
 		self.radius = 200_000                       # m
@@ -126,6 +127,7 @@ class Minmus():
 		self.parent = Kerbin
 		parent = self.parent()
 		self.name = "Minmus"
+		self.children = []
 
 		# Physical properties
 		self.radius = 60_000                        # m
