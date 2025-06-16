@@ -1,12 +1,6 @@
 from Bodies import *
 
 
-def catch(logic, message, abort=False):
-	if logic:
-		print(message)
-	return abort
-
-
 class Orbit:
 	def __init__(self, body, p_alt, a_alt, inc):
 		self.body = body
@@ -26,6 +20,7 @@ class Maneuver:
 		self.type = type
 		self.name = description
 		self.delta_v = delta_v
+
 
 class Mission:
 	def __init__(self, type="Custom", name="Unnamed Mission", origin=Kerbin):
