@@ -221,14 +221,13 @@ class mission:
 		delta_v = round(a_Vol * pow(2 * (1 - math.cos(math.pi * delta_i / 180)), 0.5))
 		return delta_v
 
-	def Launch(self, alt=None, inc=0):
+	def Launch(self, alt=None, inc=0, Landing=False):
 
 		# Error catching
-
 		if self._break_check(self.launched,
-							 'Error',
-							 'Launch()',
-							 f'Attempted to launch when already in orbit. Maneuver not added.'):
+						 'Error',
+						 'Launch()',
+						 f'Attempted to launch when already in orbit. Maneuver not added.'):
 			return
 
 		body = self.current_body()
@@ -239,7 +238,7 @@ class mission:
 					   f'Launch altitude not specified. Defaulting to standard {body.name} launch height of {body.standard_launch_height}m.'):
 			alt = body.standard_launch_height
 
-		if not self._valid_orbit(None, alt, alt, inc, 'Launch()1', 'Launch altitude'):
+		if not self._valid_orbit(None, alt, alt, inc, 'Launch()', 'Launch altitude'):
 			return
 
 		# Computation
@@ -271,10 +270,30 @@ class mission:
 		# Here we add on that drag delta-v factor as well as the delta-v required to circularize.
 		delta_v = round((adjusted_ascension_dv + drag_dv + viva) / 10) * 10
 
+		if Landing:
+			self._add_maneuver("Land",f"Controlled landing on {body.name}", delta_v)
+			return
 		self._add_maneuver("Launch",f"Launch from {body.name} to {alt}m circular orbit", delta_v)
 		self._add_orbit(alt, alt ,inc)
 		self.launched = True
 
+	def Land(self):
+		body = self.current_body()
+		if body.atm_height != 0:
+			self.Change_Orbit(body.atm_height/2, self.orbits[-1].a_alt, atm_override=True)
+			self._add_maneuver("Land", f"Aerobrake landing on {body.name}", 0)
+			self.launched = False
+		else:			
+			# Error catching			
+			alt = body.standard_launch_height
+			inc = self.orbits[-1].i
+
+			self.Change_Orbit(alt, alt, atm_override=True)
+			
+			self._add_orbit(body.radius, body.radius ,inc)
+			self.launched = False
+			self.Launch(body.standard_launch_height, inc, Landing=True)
+		
 
 	def Change_Orbit(self, new_P_Alt=None, new_A_Alt=None, new_i=None, atm_override=False):
 		# Error catching
@@ -351,7 +370,7 @@ class mission:
 
 		delta_v = None
 
-		if self.current_body is target_body.parent:
+		if target_body.parent is self.current_body:
 			initial_Rad = current_body.radius + initial_Alt
 			final_P_Rad = target_body.radius + final_P_Alt
 			final_A_Rad = target_body.radius + final_A_Alt
@@ -368,6 +387,20 @@ class mission:
 			capture_cost = hyperbolic_v_p - elliptical_v
 			delta_v = transfer_cost + capture_cost
 
+			self._add_maneuver("Transfer",
+								 f"Transfer from {current_body.name} to {target_body.name}",
+												transfer_cost)
+			self._add_orbit(self.orbits[-1].p_alt, target_body.a, self.orbits[-1].i)
+			
+	
+			self._add_maneuver("Capture",
+								 f"Capture into p_alt = {final_P_Alt}m, a_alt = {final_A_Alt}m orbit around {target_body.name}",
+												capture_cost)
+			self._add_orbit(final_P_Alt, final_A_Alt, self.orbits[-1].i)
+
+		
+		# and capture into p_alt = {final_P_Alt}m, a_alt = {final_A_Alt}m orbit.
+
 		elif target is current_body.parent:
 			initial_Rad = current_body.radius + initial_Alt
 			final_P_Rad = target_body.radius + final_P_Alt
@@ -381,10 +414,12 @@ class mission:
 
 			delta_v = v_e - v1
 
-		self._add_maneuver("Transfer and Capture",
-						   f"Transfer from {current_body.name} to {target_body.name} and capture into p_alt = {final_P_Alt}m, a_alt = {final_A_Alt}m orbit.",
-						   delta_v)
-		self._add_orbit(final_P_Alt, final_A_Alt, self.orbits[-1].i)
+			self._add_maneuver("Transfer and Capture",
+								 f"Transfer from {current_body.name} to {target_body.name} and capture into p_alt = {final_P_Alt}m, a_alt = {final_A_Alt}m orbit.",
+								 delta_v)
+			self._add_orbit(final_P_Alt, final_A_Alt, self.orbits[-1].i)
+
+		
 		self.current_body = target
 
 	def print_maneuver_bill(self, surplus_percent=10):
@@ -482,11 +517,17 @@ if __name__ == "__main__":
 	#test.Launch()
 	#test.Change_Orbit(90_000, 70_000, -6)
 
-	test.Launch(120_000)
-	test.Change_Orbit(84_600, 120_000)
-	test.Change_Orbit(84_600, 88_426)
-	test.Change_Orbit(35_000, 88_426, atm_override=True)
+	# test.Launch(120_000)
+	# test.Change_Orbit(84_600, 120_000)
+	# test.Change_Orbit(84_600, 88_426)
+	# test.Change_Orbit(35_000, 88_426, atm_override=True)
 	#test.transfer_to(Mun, 14_000, 14_000)
+	#test.transfer_to(Kerbin, 35_00, Mun().a)
+
+	test.Launch()
+	test.transfer_to(Mun, 14_000, 14_000)
+	test.Land()
+	test.Launch()
 	#test.transfer_to(Kerbin, 35_00, Mun().a)
 
 	test.print_maneuver_bill(10)
