@@ -169,6 +169,7 @@ class Minmus():
 						 parent.period)
 		self.rotation_speed = 9.3315                # m/s
 
+# Example usage
 if __name__ == "__main__":
 	# print(Kerbin().parent is Kerbol)
 	# print(Kerbin().__class__ == Kerbin)
