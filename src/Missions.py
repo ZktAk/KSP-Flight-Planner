@@ -1,3 +1,5 @@
+import math
+
 from Bodies import *
 
 
@@ -13,6 +15,7 @@ class Orbit:
 		self.a = self.r_a / (1 + self.e)
 		self.h = self.a - body.radius
 		self.i = inc
+		self.T = 2 * math.pi * pow(pow(self.a,3)/body.mu,0.5)
 
 
 class Maneuver:
@@ -401,14 +404,46 @@ class Mission:
 		
 		self.current_body = target
 
-	def _eclipse_time(self, orbit):
-		pass
-
-	def _sun_time(self, orbit):
-		pass
-
 	def Required_Battery_Capacity(self, power_usage):
-		pass
+		# power_usage in unit/s
+
+		child = self.current_body
+		orbit = self.orbits[-1]
+
+		orbit_beta_deg = orbit.i
+		orbit_alpha = math.acos(min(1, child().radius / orbit.a))
+		orbit_eclipse_angle = 2 * orbit_alpha * math.cos(math.radians(orbit_beta_deg))
+		orbit_eclipse_time = orbit_eclipse_angle * orbit.T / (2 * math.pi)
+
+		parent_eclipse_time = 0
+
+		if child().parent is not Kerbol:
+			parent = child().parent
+			parent_beta_deg = child().i
+			parent_alpha = math.acos(min(1, parent().radius / child().a))
+			parent_eclipse_angle = 2 * parent_alpha * math.cos(math.radians(parent_beta_deg))
+			parent_eclipse_time = parent_eclipse_angle * child().period / (2 * math.pi)
+
+		total_eclipse_time = orbit_eclipse_time + parent_eclipse_time
+		sunlight_time = orbit.T - total_eclipse_time
+		required_capacity = power_usage * total_eclipse_time
+
+		print(f"\n\x1b[1;36m{'=' * 60}")
+		print(f"Power Budget Summary for Mission: {self.name} ({self.type})")
+		print(f"{'=' * 60}\x1b[0m")
+
+		print(f"\x1b[1;37mOrbital Period:\x1b[0m                \x1b[1;32m{round(orbit.T):>10,} s\x1b[0m\n")
+		print(f"\x1b[1;37mOrbital Eclipse Duration:\x1b[0m      \x1b[1;32m{round(orbit_eclipse_time):>10,} s\x1b[0m")
+		print(
+			f"\x1b[1;37mParent Eclipse Duration:\x1b[0m       \x1b[1;32m{round(parent_eclipse_time):>10,} s\x1b[0m\n")
+		print(f"\x1b[1;37mTotal Time in Eclipse:\x1b[0m         \x1b[1;32m{round(total_eclipse_time):>10,} s\x1b[0m")
+		print(f"\x1b[1;37mTotal Time in Sunlight:\x1b[0m        \x1b[1;32m{round(sunlight_time):>10,} s\x1b[0m\n")
+
+		print(f"\x1b[1;36m{'-' * 60}")
+		print(f"Required Battery Capacity:\t\t\t\x1b[1;32m{round(required_capacity):,} charge units\x1b[0m")
+		print(f"\x1b[1;36m{'-' * 60}\x1b[0m\n")
+
+		return required_capacity
 
 	def print_maneuver_bill(self, surplus_percent=10):
 		if self._break_check(not self.maneuvers,
@@ -478,10 +513,14 @@ if __name__ == "__main__":
 	# Error: Abort maneuver
 	# Failure: Abort maneuver and mission
 
-	test1 = Minmus_lander()
-	test1.print_maneuver_bill(10)
+	#test1 = Minmus_lander()
+	#test1.print_maneuver_bill(10)
 
-	test2 = Munar_orbitor()
-	test2.print_maneuver_bill(10)
+	#test2 = Munar_orbitor()
+	#test2.print_maneuver_bill(10)
+
+	test3 = Kerbin_orbitor(450_000)
+	test3.print_maneuver_bill(10)
+	test3.Required_Battery_Capacity(10)
 	
 	

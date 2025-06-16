@@ -18,6 +18,7 @@ def sid2sol(T_sid, T):
 class Kerbol:
 	def __init__(self):
 		self.children = [Kerbin]
+		self.parent = None
 
 		# Physical properties
 		self.radius = 261_600_000                   # m
