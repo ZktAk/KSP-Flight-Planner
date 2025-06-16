@@ -1,5 +1,12 @@
 from Bodies import *
 
+
+def catch(logic, message, abort=False):
+	if logic:
+		print(message)
+	return abort
+
+
 class Orbit:
 	def __init__(self, body, p_alt, a_alt, inc):
 		self.body = body
@@ -12,6 +19,7 @@ class Orbit:
 		self.a = self.r_a / (1 + self.e)
 		self.h = self.a - body.radius
 		self.i = inc
+
 
 class Maneuver:
 	def __init__(self, type, description, delta_v):
@@ -409,6 +417,7 @@ class Mission:
 		                     True):
 			return
 
+
 		print(f"\n\x1b[1;36m{'=' * 60}")
 		print(f"Δv Budget Summary for Mission: {self.name} ({self.type})")
 		print(f"{'=' * 60}\x1b[0m")
@@ -461,13 +470,8 @@ class Minmus_lander(Minmus_orbitor):
 		self.Land()
 		self.type = "Preset"
 
+
 if __name__ == "__main__":
-	# Mission1 = Mission("Munar Round Trip")
-	# Mission1.add_launch(80_000)
-	# Mission1.add_transfer("Mun", 14_000, 14_000)
-	# #Mission1.add_transfer("Kerbin", 30_000, bodies["Kerbin"].a)
-	# Mission1.add_return_home()
-	# Mission1.print_BOD()
 
 	# Warning: Add maneuver
 	# Error: Abort maneuver
