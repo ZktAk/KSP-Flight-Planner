@@ -1,18 +1,5 @@
 from Bodies import *
 
-
-# mission methods
-	
-# class LKO(mission):
-# 	def __init__(self, mission_name="Low Kerbin Orbit", starting_body=Kerbin):
-# 		super().__init__(mission_name, starting_body)
-# 		self.add_launch(80_000)
-#
-# class Low_Minmus_Orbit(mission):
-# 	def __init__(self, mission_name="Low Minmus Orbit", starting_body=Kerbin):
-# 		super().__init__(mission_name, starting_body)
-# 		self.add_launch(80_000)
-# 		self.add_transfer(Minmus, 14_000, 14_000)
 class Orbit:
 	def __init__(self, body, p_alt, a_alt, inc):
 		self.body = body
@@ -32,8 +19,7 @@ class Maneuver:
 		self.name = description
 		self.delta_v = delta_v
 
-
-class mission:
+class Mission:
 	def __init__(self, type="Custom", name="Unnamed Mission", origin=Kerbin):
 		self.type = type
 		self.name = name
@@ -46,15 +32,12 @@ class mission:
 		body = origin()
 		self.orbits.append(Orbit(origin, body.radius, body.radius, 0))
 
-		# self.catches = {errors.non_cir: self.orbits[-1].r_p != self.orbits[-1].r_a,
-		#                 errors.launched: self.launched}
-
 	def _add_maneuver(self, type, description, delta_v):
 		self.maneuvers.append(Maneuver(type, description, delta_v))
+		self.type = "Custom"
 
 	def _add_orbit(self, p_alt, a_alt, inc):
 		self.orbits.append(Orbit(self.current_body, p_alt, a_alt, inc))
-
 
 	def _catch(self, logic, severity, source, message, abort=False):
 		if logic:
@@ -70,7 +53,6 @@ class mission:
 				self.aborted = True
 			return True
 		return False
-
 
 	def _break_check(self, logic=False, severity=None, source=None, message=None, abort=False):
 		if self.aborted: return True
@@ -138,7 +120,6 @@ class mission:
 						f'{param} intersects {moon.name}\'s sphere of influence. Maneuver added.')
 
 		return True
-
 
 	def _Hohmann_transfer(self, final_Alt):
 		# if self._break_check(self.orbits[-1].e != 0,
@@ -273,7 +254,7 @@ class mission:
 		if Landing:
 			self._add_maneuver("Land",f"Controlled landing on {body.name}", delta_v)
 			return
-		self._add_maneuver("Launch",f"Launch from {body.name} to {alt}m circular orbit", delta_v)
+		self._add_maneuver("Launch",f"Launch from {body.name} to {alt}m circular orbit with {inc}° inclination", delta_v)
 		self._add_orbit(alt, alt ,inc)
 		self.launched = True
 
@@ -292,8 +273,7 @@ class mission:
 			
 			self._add_orbit(body.radius, body.radius ,inc)
 			self.launched = False
-			self.Launch(body.standard_launch_height, inc, Landing=True)
-		
+			self.Launch(body.standard_launch_height, inc, Landing=True)		
 
 	def Change_Orbit(self, new_P_Alt=None, new_A_Alt=None, new_i=None, atm_override=False):
 		# Error catching
@@ -348,7 +328,6 @@ class mission:
 			self._add_maneuver("Mid-course Inclination Change", description, self._Inclination_change(new_i))
 
 		self._add_orbit(new_P_Alt, new_A_Alt, new_i)
-
 
 	def transfer_to(self, target, final_P_Alt, final_A_Alt):
 		current_body = self.current_body()
@@ -446,56 +425,41 @@ class mission:
 		print(f"Total Δv Requirement: {round(total_dv)} m/s\t|\tPlus {surplus_percent}%: {round(total_dv*(1+surplus_percent/100))}")
 		print(f"{'-' * 60}\x1b[0m\n")
 
+class Kerbin_orbitor(Mission):
+	def __init__(self, alt=Kerbin().standard_launch_height, inc=0, type="Preset", name="Kerbin Orbitor", origin=Kerbin):
+		super().__init__(type, name, origin)
+		self.Launch(alt, inc)
+		self.type = "Preset"
 
-# class Mission:
-# 	def __init__(self, mission_name="Unnamed Mission", starting_body="Kerbin"):
-# 		self.name = mission_name
-# 		self.start = self.current_body = starting_body
-# 		self.launched = False
-# 		self.orbits = []
-# 		self.manuevers = []
-# 		self.descriptions = []
-#
+class Munar_orbitor(Mission):
+	def __init__(self, target_p_alt=Mun().standard_launch_height, target_a_alt=Mun().standard_launch_height, inc=Mun().i, type="Preset", name="Munar Orbitor", origin=Kerbin):
+		body = Mun
+		super().__init__(type, name, origin)
+		self.Launch(Kerbin().standard_launch_height, body().i)
+		self.transfer_to(body, target_p_alt, target_a_alt)
+		self.Change_Orbit(target_p_alt, target_a_alt, inc)
+		self.type = "Preset"
 
-# 	def add_land(self, p=True):
-# 		current_orbit = self.orbits[-1]
-# 		if current_orbit.p_alt != current_orbit.a_alt:
-# 			self.add_change_orbit(current_orbit.p_alt, current_orbit.p_alt, p=False)
-# 			if p:
-# 				print(f'Warning: Landing maneuver assumes initial orbit is circular. '
-# 					  f'Added circularization maneuver to {current_orbit.p_alt}m.')
-#
-# 		self.manuevers.append(Launch(bodies[self.current_body], current_orbit.p_alt, 0))  # Placeholder
-# 		self.descriptions.append(f"Descent to surface of {self.current_body} from {current_orbit.p_alt} m orbit")
-# 		if p:
-# 			print(f'Success: Added landing maneuver to surface of {self.current_body}.')
-#
-# 	def add_return_home(self, p=True):
-# 		if self.current_body == "Kerbin":
-# 			reentry_apoapsis = self.orbits[-1].a_alt
-# 		else:
-# 			reentry_apoapsis = bodies[self.current_body].a
-#
-# 		# Insert return header and placeholder for delta-v (0 m/s)
-# 		self.descriptions.append("<Initiating Return Home>")
-# 		self.manuevers.append(None)  # Keep indices aligned; handled explicitly in print_BOD()
-#
-# 		maneuver = Transfer_and_capture(bodies[self.current_body],
-# 										bodies["Kerbin"],
-# 										self.orbits[-1].p_alt,
-# 										30_000,
-# 										reentry_apoapsis)
-#
-# 		self.manuevers.append(maneuver)
-# 		self.descriptions.append(f"Return to Kerbin: Hp=30,000 m, Ha={reentry_apoapsis} m")
-#
-# 		self.orbits.append(Orbit(bodies["Kerbin"], 30_000, reentry_apoapsis, 0))
-# 		self.current_body = "Kerbin"
-# 		self.launched = False
-#
-# 		if p:
-# 			print(f'Success: Added return trajectory to Kerbin atmosphere (30,000m periapsis).')
-#
+class Minmus_orbitor(Mission):
+	def __init__(self, target_p_alt=Minmus().standard_launch_height, target_a_alt=Minmus().standard_launch_height, inc=Minmus().i, type="Preset", name="Minmus Orbitor", origin=Kerbin):
+		body = Minmus
+		super().__init__(type, name, origin)
+		self.Launch(Kerbin().standard_launch_height, body().i)
+		self.transfer_to(body, target_p_alt, target_a_alt)
+		self.Change_Orbit(target_p_alt, target_a_alt, inc)
+		self.type = "Preset"
+		
+class Munar_lander(Munar_orbitor):
+	def __init__(self, type="Preset", name="Mun Lander", origin=Kerbin):
+		super().__init__(type=type, name=name, origin=origin)
+		self.Land()
+		self.type = "Preset"
+
+class Minmus_lander(Minmus_orbitor):
+	def __init__(self, type="Preset", name="Minmus Lander", origin=Kerbin):
+		super().__init__(type=type, name=name, origin=origin)
+		self.Land()
+		self.type = "Preset"
 
 if __name__ == "__main__":
 	# Mission1 = Mission("Munar Round Trip")
@@ -509,7 +473,7 @@ if __name__ == "__main__":
 	# Error: Abort maneuver
 	# Failure: Abort maneuver and mission
 
-	test = mission()
+	test = Minmus_lander()
 	#print(Mun().a-Kerbin().radius)
 	#test.Launch(11400000)
 	#test.Launch(80_000)
@@ -521,17 +485,16 @@ if __name__ == "__main__":
 	# test.Change_Orbit(84_600, 120_000)
 	# test.Change_Orbit(84_600, 88_426)
 	# test.Change_Orbit(35_000, 88_426, atm_override=True)
-	#test.transfer_to(Mun, 14_000, 14_000)
+	# test.transfer_to(Mun, 14_000, 14_000)
 	#test.transfer_to(Kerbin, 35_00, Mun().a)
 
-	test.Launch()
-	test.transfer_to(Mun, 14_000, 14_000)
-	test.Land()
-	test.Launch()
-	#test.transfer_to(Kerbin, 35_00, Mun().a)
+	# test.Launch()
+	#test.transfer_to(Mun, 14_000, 14_000)
+	# test.Land()
+	# test.Launch()
+	# test.transfer_to(Kerbin, Kerbin().atm_height/2, Mun().a)
+
+	# test.Launch(120_000)
+	# test.Change_Orbit(120_000, 120_000)
 
 	test.print_maneuver_bill(10)
-
-
-
-
