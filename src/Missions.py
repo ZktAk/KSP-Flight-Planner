@@ -332,19 +332,19 @@ class Mission:
 
 		self._add_orbit(new_P_Alt, new_A_Alt, new_i)
 
-	def transfer_to(self, target, final_P_Alt, final_A_Alt):
+	def Transfer(self, target, final_P_Alt, final_A_Alt):
 		current_body = self.current_body()
 		target_body = target()
 		logic = (target not in current_body.children) and (target is not current_body.parent)
-		if self._break_check(logic, "Failure", "transfer_to()",
+		if self._break_check(logic, "Failure", "Transfer()",
 							 f'Cannot transfer to {target_body.name} from {current_body.name}. Mission construction aborted!',
 							 True):
 			return
 
-		if not self._valid_orbit(target, final_P_Alt, final_A_Alt, source='transfer_to()', param='Orbit altitude', atm_override=True):
+		if not self._valid_orbit(target, final_P_Alt, final_A_Alt, source='Transfer()', param='Orbit altitude', atm_override=True):
 			return
 
-		if self._catch(self.orbits[-1].e != 0, "Warning", "transfer_to()",
+		if self._catch(self.orbits[-1].e != 0, "Warning", "Transfer()",
 					  f'Transfer orbit assumes initial orbit is circular. Added circularization maneuver to {self.orbits[-1].a_alt}m.'):
 			self.Change_Orbit(self.orbits[-1].a_alt, self.orbits[-1].a_alt)
 
@@ -380,9 +380,6 @@ class Mission:
 												capture_cost)
 			self._add_orbit(final_P_Alt, final_A_Alt, self.orbits[-1].i)
 
-		
-		# and capture into p_alt = {final_P_Alt}m, a_alt = {final_A_Alt}m orbit.
-
 		elif target is current_body.parent:
 			initial_Rad = current_body.radius + initial_Alt
 			final_P_Rad = target_body.radius + final_P_Alt
@@ -403,6 +400,15 @@ class Mission:
 
 		
 		self.current_body = target
+
+	def _eclipse_time(self, orbit):
+		pass
+
+	def _sun_time(self, orbit):
+		pass
+
+	def Required_Battery_Capacity(self, power_usage):
+		pass
 
 	def print_maneuver_bill(self, surplus_percent=10):
 		if self._break_check(not self.maneuvers,
@@ -440,7 +446,7 @@ class Munar_orbitor(Mission):
 		body = Mun
 		super().__init__(type, name, origin)
 		self.Launch(Kerbin().standard_launch_height, body().i)
-		self.transfer_to(body, target_p_alt, target_a_alt)
+		self.Transfer(body, target_p_alt, target_a_alt)
 		self.Change_Orbit(target_p_alt, target_a_alt, inc)
 		self.type = "Preset"
 
@@ -449,7 +455,7 @@ class Minmus_orbitor(Mission):
 		body = Minmus
 		super().__init__(type, name, origin)
 		self.Launch(Kerbin().standard_launch_height, body().i)
-		self.transfer_to(body, target_p_alt, target_a_alt)
+		self.Transfer(body, target_p_alt, target_a_alt)
 		self.Change_Orbit(target_p_alt, target_a_alt, inc)
 		self.type = "Preset"
 		
@@ -472,28 +478,10 @@ if __name__ == "__main__":
 	# Error: Abort maneuver
 	# Failure: Abort maneuver and mission
 
-	test = Minmus_lander()
-	#print(Mun().a-Kerbin().radius)
-	#test.Launch(11400000)
-	#test.Launch(80_000)
-	#test.Launch(50_000)
-	#test.Launch()
-	#test.Change_Orbit(90_000, 70_000, -6)
+	test1 = Minmus_lander()
+	test1.print_maneuver_bill(10)
 
-	# test.Launch(120_000)
-	# test.Change_Orbit(84_600, 120_000)
-	# test.Change_Orbit(84_600, 88_426)
-	# test.Change_Orbit(35_000, 88_426, atm_override=True)
-	# test.transfer_to(Mun, 14_000, 14_000)
-	#test.transfer_to(Kerbin, 35_00, Mun().a)
-
-	# test.Launch()
-	#test.transfer_to(Mun, 14_000, 14_000)
-	# test.Land()
-	# test.Launch()
-	# test.transfer_to(Kerbin, Kerbin().atm_height/2, Mun().a)
-
-	# test.Launch(120_000)
-	# test.Change_Orbit(120_000, 120_000)
-
-	test.print_maneuver_bill(10)
+	test2 = Munar_orbitor()
+	test2.print_maneuver_bill(10)
+	
+	
