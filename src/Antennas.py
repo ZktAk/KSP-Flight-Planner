@@ -98,16 +98,14 @@ class Multi:
 		self.antennas.append(antenna)
 
 	def combined_power(self):
-		c_numerator = 0
-		sum_power = 0
 
-		for antenna in self.antennas:
-			c_numerator += antenna.power * antenna.compatibility
-			sum_power += antenna.power
+		c_numerator = sum(antenna.power * antenna.compatibility for antenna in self.antennas)
+		sum_power = sum(antenna.power for antenna in self.antennas)
+		max_power = max(antenna.power for antenna in self.antennas)
 
 		c = c_numerator / sum_power
-		max_power = max(antenna.power for antenna in self.antennas)
 		total_power = max_power * pow(sum_power/max_power, c)
+
 		return total_power
 
 
