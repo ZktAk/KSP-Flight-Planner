@@ -59,7 +59,7 @@ class Satellite():
 
 		if body is Kerbin:
 			min_distance = self.orbit.p_alt
-			max_distance = self.a_alt
+			max_distance = self.orbit.a_alt
 		elif body().parent is Kerbin:
 			r_p = self.orbit.p_alt + body().radius
 			r_a = self.orbit.a_alt + body().radius
@@ -87,8 +87,14 @@ class Satellite():
 class CommNet:
 	def __init__(self, tier=1):
 		self.tier = tier
+		self.DSN = {1:2*pow(10,9), 2:50*pow(10,9), 3:250*pow(10,9)}[tier]
 		self.satellites = []
+		self.satellite = None
 
+	def add_satellite(self, orbit, power):
+		self.satellite = Satellite(orbit, power, self.DSN)
+		self.satellites.append(self.satellite)	
+		
 	def closest_relay(self):
 		pass
 

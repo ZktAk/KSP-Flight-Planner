@@ -1,8 +1,8 @@
 import math
 
 from Bodies import *
-import CommNet
-import Antennas
+# import CommNet
+# import Antennas
 
 
 class Orbit:
@@ -224,7 +224,7 @@ class Mission:
 		if self._catch(alt is None,
 					   'Warning',
 					   'Launch()',
-					   f'Launch altitude not specified. Defaulting to standard {body.name} launch height of {body.standard_launch_height}m.'):
+					   f'Launch altitude not specified. Defaulting to standard {body.name} launch height of {body.standard_launch_height:,}m.'):
 			alt = body.standard_launch_height
 
 		if not self._valid_orbit(None, alt, alt, inc, 'Launch()', 'Launch altitude'):
@@ -262,7 +262,7 @@ class Mission:
 		if Landing:
 			self._add_maneuver("Land",f"Controlled landing on {body.name}", delta_v)
 			return
-		self._add_maneuver("Launch",f"Launch from {body.name} to {alt}m circular orbit with {inc}° inclination", delta_v)
+		self._add_maneuver("Launch",f"Launch from {body.name} to {alt:,}m circular orbit with {inc}° inclination", delta_v)
 		self._add_orbit(alt, alt ,inc)
 		self.launched = True
 
@@ -314,7 +314,7 @@ class Mission:
 		if params[:2] != defaults[:2]:
 
 			if (params[1] == defaults[1]) and (params[0] == defaults[1]):
-				description = f'Circularization maneuver performed at A_alt = {new_A_Alt}m'
+				description = f'Circularization maneuver performed at A_alt = {new_A_Alt:,}m'
 			else:
 				n = 0
 				for i in range(3):
@@ -350,7 +350,7 @@ class Mission:
 			return
 
 		if self._catch(self.orbits[-1].e != 0, "Warning", "Transfer()",
-					  f'Transfer orbit assumes initial orbit is circular. Added circularization maneuver to {self.orbits[-1].a_alt}m.'):
+					  f'Transfer orbit assumes initial orbit is circular. Added circularization maneuver to {self.orbits[-1].a_alt:,}m.'):
 			self.Change_Orbit(self.orbits[-1].a_alt, self.orbits[-1].a_alt)
 
 		initial_Alt = self.orbits[-1].a
@@ -381,8 +381,9 @@ class Mission:
 			
 	
 			self._add_maneuver("Capture",
-								 f"Capture into p_alt = {final_P_Alt}m, a_alt = {final_A_Alt}m orbit around {target_body.name}",
+								 f"Capture into p_alt = {final_P_Alt:,}m, a_alt = {final_A_Alt:,}m orbit around {target_body.name}",
 												capture_cost)
+			self.current_body = target
 			self._add_orbit(final_P_Alt, final_A_Alt, self.orbits[-1].i)
 
 		elif target is current_body.parent:
@@ -399,34 +400,34 @@ class Mission:
 			delta_v = v_e - v1
 
 			self._add_maneuver("Transfer and Capture",
-								 f"Transfer from {current_body.name} to {target_body.name} and capture into p_alt = {final_P_Alt}m, a_alt = {final_A_Alt}m orbit.",
+								 f"Transfer from {current_body.name} to {target_body.name} and capture into p_alt = {final_P_Alt:,}m, a_alt = {final_A_Alt:,}m orbit.",
 								 delta_v)
+			self.current_body = target
 			self._add_orbit(final_P_Alt, final_A_Alt, self.orbits[-1].i)
-
-		
-		self.current_body = target
 
 	def print_power_bill(self, power_usage):
 		# power_usage in unit/s
-
-		child = self.current_body
 		orbit = self.orbits[-1]
+		body = self.current_body()
+		
 
-		orbit_beta_deg = orbit.i
-		orbit_alpha = math.acos(min(1, child().radius / orbit.a))
-		orbit_eclipse_angle = 2 * orbit_alpha * math.cos(math.radians(orbit_beta_deg))
-		orbit_eclipse_time = orbit_eclipse_angle * orbit.T / (2 * math.pi)
+		beta = orbit.i
+		alpha = math.acos(body.radius / orbit.a)
+		eclipse_angle = 2 * alpha * math.cos(math.radians(beta))
+		eclipse_time = eclipse_angle * orbit.T / (2 * math.pi)
 
-		parent_eclipse_time = 0
+		moon_eclipse_time = 0
 
-		if child().parent is not Kerbol:
-			parent = child().parent
-			parent_beta_deg = child().i
-			parent_alpha = math.acos(min(1, parent().radius / child().a))
-			parent_eclipse_angle = 2 * parent_alpha * math.cos(math.radians(parent_beta_deg))
-			parent_eclipse_time = parent_eclipse_angle * child().period / (2 * math.pi)
+		if body.parent is not Kerbol:
+			moon = body
+			planet = moon.parent()
+			
+			beta = moon.i
+			alpha = math.acos(planet.radius / moon.a)
+			eclipse_angle = math.pi - (2 * alpha * math.cos(math.radians(beta)))
+			moon_eclipse_time = eclipse_angle * moon.period / (2 * math.pi)
 
-		total_eclipse_time = orbit_eclipse_time + parent_eclipse_time
+		total_eclipse_time = eclipse_time + moon_eclipse_time
 		sunlight_time = orbit.T - total_eclipse_time
 		required_capacity = power_usage * total_eclipse_time
 
@@ -435,9 +436,9 @@ class Mission:
 		print(f"{'=' * 60}\x1b[0m")
 
 		print(f"\x1b[1;37mOrbital Period:\x1b[0m                \x1b[1;32m{round(orbit.T):>10,} s\x1b[0m\n")
-		print(f"\x1b[1;37mOrbital Eclipse Duration:\x1b[0m      \x1b[1;32m{round(orbit_eclipse_time):>10,} s\x1b[0m")
+		print(f"\x1b[1;37mOrbital Eclipse Duration:\x1b[0m      \x1b[1;32m{round(eclipse_time):>10,} s\x1b[0m")
 		print(
-			f"\x1b[1;37mParent Eclipse Duration:\x1b[0m       \x1b[1;32m{round(parent_eclipse_time):>10,} s\x1b[0m\n")
+			f"\x1b[1;37mParent Eclipse Duration:\x1b[0m       \x1b[1;32m{round(moon_eclipse_time):>10,} s\x1b[0m\n")
 		print(f"\x1b[1;37mTotal Time in Eclipse:\x1b[0m         \x1b[1;32m{round(total_eclipse_time):>10,} s\x1b[0m")
 		print(f"\x1b[1;37mTotal Time in Sunlight:\x1b[0m        \x1b[1;32m{round(sunlight_time):>10,} s\x1b[0m\n")
 
@@ -472,7 +473,7 @@ class Mission:
 		print(f"Total Δv Requirement: {round(total_dv)} m/s\t|\tPlus {surplus_percent}%: {round(total_dv*(1+surplus_percent/100))}")
 		print(f"{'-' * 60}\x1b[0m\n")
 
-	def final_orbit(self):
+	def complete(self):
 		return self.orbits[-1]
 
 class Kerbin_orbitor(Mission):
@@ -511,7 +512,7 @@ class Minmus_lander(Minmus_orbitor):
 		self.Land()
 		self.type = "Preset"
 
-
+# Example usage
 if __name__ == "__main__":
 
 	# Warning: Add maneuver
@@ -528,7 +529,7 @@ if __name__ == "__main__":
 	test3.print_maneuver_bill(10)
 	test3.print_power_bill(10)
 
-	CommNet.Test_comms()
+	# CommNet.Test_comms()
 	# Antennas.Test_ants()
 	
 	
