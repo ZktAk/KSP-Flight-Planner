@@ -2,12 +2,6 @@ from Missions import Orbit
 import Antennas
 from Bodies import *
 
-DSN_tiers = {1:2*pow(10,9), 2:50*pow(10,9), 3:250*pow(10,9)}
-# DSN_tier = 2
-# DSN = DSN_tiers[DSN_tier]
-
-
-
 class Satellite():
 	def __init__(self, orbit, power, DSN):
 		self.orbit = orbit
@@ -49,8 +43,14 @@ class Satellite():
 			total_power = max_power * pow(sum_power / max_power, c)
 			self.relay_power = total_power
 	
-	def _range(self):
-		r = pow(self.DSN * self.antenna_power, 0.5)
+	def _range(self, target=None):
+		target = self.DSN if target is None else target
+		r = pow(target * self.antenna_power, 0.5)
+		self.range = r
+
+	def _relay_range(self, target=None):
+		target = self.DSN if target is None else target
+		r = pow(target * self.relay_power, 0.5)
 		self.range = r
 
 	def direct_strength(self):
@@ -89,14 +89,31 @@ class CommNet:
 		self.tier = tier
 		self.DSN = {1:2*pow(10,9), 2:50*pow(10,9), 3:250*pow(10,9)}[tier]
 		self.satellites = []
-		self.satellite = None
+		self._satellite = None
 
-	def add_satellite(self, orbit, power):
-		self.satellite = Satellite(orbit, power, self.DSN)
-		self.satellites.append(self.satellite)	
+	def add_satellite(self, satellite):
+		self._satellite = satellite
+		self.satellites.append(satellite)	
+
+	def has_signal(self, satellite, target_strength=0.7):
+		visited = set()
+		path, strength = self._find_signal_path(sat, target_strength, visited)
+		if path:
+			return path, strength
+		return None
+
+	
+	def signal_strength(self, sat, target):
+		target_power = target.relay_power
+		sat_range
 		
-	def closest_relay(self):
-		pass
+		
+		distance = sat.distance_to(target)
+		if distance == 0 or sat.antenna_power == 0:
+			return 0
+		x = 1 - (sat.range / distance)
+		return max(0, -2 * x**3 + 3 * x**2)
+	
 
 # Example usage
 def Test_comms():

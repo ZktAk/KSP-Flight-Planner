@@ -1,9 +1,5 @@
 import math
-
 from Bodies import *
-# import CommNet
-# import Antennas
-
 
 class Orbit:
 	def __init__(self, body, p_alt, a_alt, inc):
@@ -51,6 +47,10 @@ class Mission:
 		if logic:
 			severities = {'Warning': 'yellow', 'Error': 'orange', 'Failure': 'red'}
 			color = {'Warning': '\x1b[1;34m', 'Error': '\x1b[1;33m', 'Failure': '\x1b[1;31m'}
+
+			# Warning: Add maneuver
+			# Error: Abort maneuver
+			# Failure: Abort maneuver and mission
 
 			# print(f'\x1b[{'1;34'}m {"Warning"} \x1b[0m')
 			# print(f'\x1b[{'1;33'}m {"Error"} \x1b[0m')
@@ -130,14 +130,6 @@ class Mission:
 		return True
 
 	def _Hohmann_transfer(self, final_Alt):
-		# if self._break_check(self.orbits[-1].e != 0,
-		#                      "Failure",
-		#                      "_Hohmann_transfer()",
-		#                      f'_Hohmann_transfer() requires initial orbit to be circular. '
-		#                      f'Mission construction aborted!.',
-		#                      True):
-		# 	return
-
 		body = self.current_body()
 		mu = body.mu
 
@@ -152,13 +144,6 @@ class Mission:
 		return vis, viva, delta_v
 
 	def _Coplanar_transfer(self, final_P_Alt, final_A_Alt):
-		# if self._break_check(final_P_Alt > final_A_Alt,
-		#                      'Failure',
-		#                      '_Coplanar_transfer()',
-		#                      'Given periapsis is greater than apoapsis. Mission construction aborted!',
-		#                      True):
-		# 	return
-
 		body = self.current_body()
 		R, mu = body.radius, body.mu
 
@@ -445,8 +430,7 @@ class Mission:
 		print(f"\x1b[1;36m{'-' * 60}")
 		print(f"Required Battery Capacity:\t\t\t\x1b[1;32m{round(required_capacity):,} charge units\x1b[0m")
 		print(f"\x1b[1;36m{'-' * 60}\x1b[0m\n")
-
-		return required_capacity
+		return round(required_capacity)
 
 	def print_maneuver_bill(self, surplus_percent=10):
 		if self._break_check(not self.maneuvers,
@@ -515,10 +499,6 @@ class Minmus_lander(Minmus_orbitor):
 # Example usage
 if __name__ == "__main__":
 
-	# Warning: Add maneuver
-	# Error: Abort maneuver
-	# Failure: Abort maneuver and mission
-
 	#test1 = Minmus_lander()
 	#test1.print_maneuver_bill(10)
 
@@ -528,8 +508,3 @@ if __name__ == "__main__":
 	test3 = Kerbin_orbitor(450_000)
 	test3.print_maneuver_bill(10)
 	test3.print_power_bill(10)
-
-	# CommNet.Test_comms()
-	# Antennas.Test_ants()
-	
-	

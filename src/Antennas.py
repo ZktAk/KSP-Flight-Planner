@@ -1,4 +1,3 @@
-
 class Communotron_16:
 	cost = 300                  # Kerbucks
 	mass = 0.005                # tons
