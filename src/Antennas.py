@@ -6,7 +6,7 @@ class Communotron_16:
 	power = 500 * pow(10,3)     # m
 	packet_size = 2             # Mits
 	speed = 10/3                # Mits/s
-	relay = False
+	is_relay = False
 	compatibility = 1
 
 class Communotron_16_S:
@@ -16,7 +16,7 @@ class Communotron_16_S:
 	power = 500 * pow(10,3)     # m
 	packet_size = 2             # Mits
 	speed = 10 / 3              # Mits/s
-	relay = False
+	is_relay = False
 	compatibility = 0
 
 class Communotron_DTS_M1:
@@ -26,7 +26,7 @@ class Communotron_DTS_M1:
 	power = 2 * pow(10,9)       # m
 	packet_size = 2             # Mits
 	speed = 5.7142857142857     # Mits/s
-	relay = False
+	is_relay = False
 	compatibility = 0.75
 
 class Communotron_HG_55:
@@ -36,7 +36,7 @@ class Communotron_HG_55:
 	power = 15 * pow(10,9)      # m
 	packet_size = 3             # Mits
 	speed = 20                  # Mits/s
-	relay = False
+	is_relay = False
 	compatibility = 0.75
 
 class Communotron_88_88:
@@ -46,7 +46,7 @@ class Communotron_88_88:
 	power = 100 * pow(10,9)     # m
 	packet_size = 2             # Mits
 	speed = 20                  # Mits/s
-	relay = False
+	is_relay = False
 	compatibility = 0.75
 
 class HG_5_High_Gain_Antenna:
@@ -56,37 +56,37 @@ class HG_5_High_Gain_Antenna:
 	power = 5 * pow(10,6)       # m
 	packet_size = 2             # Mits
 	speed = 5.7142857142857     # Mits/s
-	relay = True
+	is_relay = True
 	compatibility = 0.75
 
-class RA_2_Relay_Antenna:
+class RA_2_is_relay_Antenna:
 	cost = 1800                 # Kerbucks
 	mass = 0.15                 # tons
 	electricity = 24            # charge/Mit
 	power = 2 * pow(10,9)       # m
 	packet_size = 1             # Mits
 	speed = 2.8571428571429     # Mits/s
-	relay = True
+	is_relay = True
 	compatibility = 0.75
 
-class RA_15_Relay_Antenna:
+class RA_15_is_relay_Antenna:
 	cost = 2400                 # Kerbucks
 	mass = 0.3                  # tons
 	electricity = 12            # charge/Mit
 	power = 15 * pow(10,9)      # m
 	packet_size = 2             # Mits
 	speed = 5.7142857142857     # Mits/s
-	relay = True
+	is_relay = True
 	compatibility = 0.75
 
-class RA_100_Relay_Antenna:
+class RA_100_is_relay_Antenna:
 	cost = 3000                 # Kerbucks
 	mass = 0.65                 # tons
 	electricity = 6             # charge/Mit
 	power = 100 * pow(10,9)     # m
 	packet_size = 4             # Mits
 	speed = 11.428571428571     # Mits/s
-	relay = True
+	is_relay = True
 	compatibility = 0.75
 
 
