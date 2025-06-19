@@ -110,7 +110,7 @@ class Multi:
 
 
 # Example usage
-if __name__ == "__main__":
+def Test_ants():
 	test = Multi()
 	test.add(Communotron_16)
 	test.add(Communotron_16)

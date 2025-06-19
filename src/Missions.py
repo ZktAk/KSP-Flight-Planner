@@ -1,6 +1,8 @@
 import math
 
 from Bodies import *
+import CommNet
+import Antennas
 
 
 class Orbit:
@@ -404,7 +406,7 @@ class Mission:
 		
 		self.current_body = target
 
-	def Required_Battery_Capacity(self, power_usage):
+	def print_power_bill(self, power_usage):
 		# power_usage in unit/s
 
 		child = self.current_body
@@ -521,6 +523,9 @@ if __name__ == "__main__":
 
 	test3 = Kerbin_orbitor(450_000)
 	test3.print_maneuver_bill(10)
-	test3.Required_Battery_Capacity(10)
+	test3.print_power_bill(10)
+
+	CommNet.Test_comms()
+	# Antennas.Test_ants()
 	
 	
