@@ -472,6 +472,9 @@ class Mission:
 		print(f"Total Δv Requirement: {round(total_dv)} m/s\t|\tPlus {surplus_percent}%: {round(total_dv*(1+surplus_percent/100))}")
 		print(f"{'-' * 60}\x1b[0m\n")
 
+	def final_orbit(self):
+		return self.orbits[-1]
+
 class Kerbin_orbitor(Mission):
 	def __init__(self, alt=Kerbin().standard_launch_height, inc=0, type="Preset", name="Kerbin Orbitor", origin=Kerbin):
 		super().__init__(type, name, origin)

@@ -8,9 +8,9 @@ DSN_tiers = {1:2*pow(10,9), 2:50*pow(10,9), 3:250*pow(10,9)}
 
 
 
-class Satellite(Orbit):
-	def __init__(self, body, p_alt, a_alt, inc, power, DSN):
-		super().__init__(body, p_alt, a_alt, inc)
+class Satellite():
+	def __init__(self, orbit, power, DSN):
+		self.orbit = orbit
 		self.batt = power
 		self.charge = power
 		self.antennas = []
@@ -55,14 +55,14 @@ class Satellite(Orbit):
 
 	def direct_strength(self):
 		min_distance = max_distance = 0
-		body = self.body
+		body = self.orbit.body
 
 		if body is Kerbin:
-			min_distance = self.p_alt
+			min_distance = self.orbit.p_alt
 			max_distance = self.a_alt
 		elif body().parent is Kerbin:
-			r_p = self.p_alt + body().radius
-			r_a = self.a_alt + body().radius
+			r_p = self.orbit.p_alt + body().radius
+			r_a = self.orbit.a_alt + body().radius
 
 			min_distance = (body().r_p - body().parent().radius) - r_a
 			max_distance = (body().r_a - body().parent().radius) + r_a
@@ -94,7 +94,8 @@ class CommNet:
 
 # Example usage
 def Test_comms():
-	new = Satellite(Mun, 50_000, 50_000, 0, 14_000, DSN_tiers[1])
+	orbit = Orbit(Mun, 50_000, 50_000, 0)
+	new = Satellite(orbit, 14_000, DSN_tiers[1])
 	new.add_antenna(Antennas.Communotron_16)
 	new.add_antenna(Antennas.Communotron_16)
 	max, min = new.direct_strength()
