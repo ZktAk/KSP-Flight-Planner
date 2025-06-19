@@ -1,11 +1,13 @@
+entrypoint = "main.py"  # use your actual main file
+
 [workflows]
-runButton = "Run"
+runButton = "Run Main"
 
 [[workflows.workflow]]
-name = "Run"
+name = "Run Main"
 author = 5534134
 mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python3 src/Missions.py"
+args = "python3 src/main.py"
