@@ -3,7 +3,7 @@ from Bodies import *
 
 class Orbit:
 	def __init__(self, body, p_alt, a_alt, inc):
-		self.body = body
+		self.parent = body
 		body = body()
 		self.p_alt = p_alt
 		self.a_alt = a_alt
