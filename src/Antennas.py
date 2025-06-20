@@ -58,7 +58,7 @@ class HG_5_High_Gain_Antenna:
 	is_relay = True
 	compatibility = 0.75
 
-class RA_2_is_relay_Antenna:
+class RA_2_relay_Antenna:
 	cost = 1800                 # Kerbucks
 	mass = 0.15                 # tons
 	electricity = 24            # charge/Mit
@@ -68,7 +68,7 @@ class RA_2_is_relay_Antenna:
 	is_relay = True
 	compatibility = 0.75
 
-class RA_15_is_relay_Antenna:
+class RA_15_relay_Antenna:
 	cost = 2400                 # Kerbucks
 	mass = 0.3                  # tons
 	electricity = 12            # charge/Mit
@@ -78,7 +78,7 @@ class RA_15_is_relay_Antenna:
 	is_relay = True
 	compatibility = 0.75
 
-class RA_100_is_relay_Antenna:
+class RA_100_relay_Antenna:
 	cost = 3000                 # Kerbucks
 	mass = 0.65                 # tons
 	electricity = 6             # charge/Mit

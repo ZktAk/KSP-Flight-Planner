@@ -496,6 +496,12 @@ class Minmus_lander(Minmus_orbitor):
 		self.Land()
 		self.type = "Preset"
 
+class Duna_orbitor(Mission):
+		def __init__(self, alt=Duna().standard_launch_height, inc=0, type="Preset", name="Duna Orbitor", origin=Duna):
+			super().__init__(type, name, origin)
+			self.Launch(alt, inc)
+			self.type = "Preset"
+
 # Example usage
 if __name__ == "__main__":
 

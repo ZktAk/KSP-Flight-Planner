@@ -42,7 +42,7 @@ class Kerbin():
 		self.mass = 5.2915158E+22                   # kg
 		self.mu = 3.5316000E+12                     # m^3/s^2
 		self.g = self.mu / pow(self.radius, 2)      # m/s^2
-		self.SOI = 84159286                         # m
+		self.SOI = 84159286                         # m from center
 
 		# Rotational properties
 		self.rotation_period = 21549.425            # s, T_sid
@@ -52,12 +52,12 @@ class Kerbin():
 		# Atmospheric Properties
 		self.atm_height = 70000                     # m
 		self.standard_launch_height =80_000        # m
-		self.atm_delta_v = 1000                     # m/s
+		self.atm_delta_v = 1090                     # m/s
 
 		# Orbital parameters
-		self.a = 13_599_840_256                     # m
-		self.r_p = 13_599_840_256                   # m
-		self.r_a = 13_599_840_256                   # m
+		self.a = 13_599_840_256                     # m from center
+		self.r_p = 13_599_840_256                   # m from center
+		self.r_a = 13_599_840_256                   # m from center
 		self.e = 0                                  # unitless
 		self.i = 0                                  # °
 		self.w = 0      #Argument of periapsis      # °
@@ -169,6 +169,52 @@ class Minmus():
 						 self.rotation_period,
 						 parent.period)
 		self.rotation_speed = 9.3315                # m/s
+
+class Duna():
+	def __init__(self):
+		self.parent = Kerbol
+		parent = self.parent()
+		self.name = "Duna"
+		self.children = []
+
+		# Physical properties
+		self.radius = 320_000                       # m
+		self.mass = 4.5154270E+21                   # kg
+		self.mu = 3.0136321E+11                     # m^3/s^2
+		self.g = self.mu / pow(self.radius, 2)      # m/s^2
+		self.SOI = 47921949                         # m from center
+
+		# Rotational properties
+		self.rotation_period = 65517.859            # s, T_sid
+		self.solar_day = 65766.707                  # s, T_sol
+		self.rotation_speed = 30.688                # m/s
+
+		# Atmospheric Properties
+		self.atm_height = 50000                     # m
+		self.standard_launch_height = 60_000        # m
+		self.atm_delta_v = 480                     # m/s
+
+		# Orbital parameters
+		self.a = 20_726_155_264                     # m from center
+		self.r_p = 19_669_121_365.3                 # m from center
+		self.r_a = 21_783_189_162.7                 # m from center
+		self.e = 0.051                              # unitless
+		self.i = 0.06                               # °
+		self.w = 0      #Argument of periapsis      # °
+		self.RAAN = 135.5                           # °
+		self.period = (2 * math.pi *                # s
+									 pow(
+										 pow(self.a, 3) /
+										 parent.mu,
+										 0.5)
+									 )
+
+		# Rotational properties
+		# self.solar_day = 65766.707                  # s, T_sol
+		# self.rotation_period = sol2sid(             # s, T_sid
+		# 						 self.solar_day,
+		# 						 self.period)
+		# self.rotation_speed = 30.688                # m/s
 
 # Example usage
 if __name__ == "__main__":
