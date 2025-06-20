@@ -106,14 +106,18 @@ class CommNet:
 			print("SHOULD NOT GET HERE")
 
 
-	def test_signal_strength(self, satellite, target_strength=0.7):
+	def query_signal_strength(self, satellite, target_strength=0.7):
 		visited = set()
 		path, strength = self._find_signal_path(satellite, target_strength, visited)
-		
-		if strength < target_strength:
-			print(f'\nNo path strength of {round(target_strength*100)}% found. Best path strength: {round(strength*100)}%')
-		else:    
-			print(f'\nPath strength of {round(target_strength*100)}% or better found. Best path stength: {round(strength*100)}%')		
+
+		print(f"\n\x1b[1;36m{'=' * 60}")
+		print(f"DNS Signal Path Strength Summary")
+		print(f"{'=' * 60}\x1b[0m\n")
+
+		print(f"\x1b[1;37mTarget Min Strength:\x1b[0m           \x1b[1;32m{round(target_strength*100)}%\x1b[0m")
+		print(f"\x1b[1;37mFound Max Strength:\x1b[0m            \x1b[1;32m{round(strength*100)}%\x1b[0m\n")
+		print(f"\x1b[1;36m{'-' * 60}\x1b[0m\n")		
+	
 
 	def _find_signal_path(self, me, target_strength, visited):
 		if me in visited:

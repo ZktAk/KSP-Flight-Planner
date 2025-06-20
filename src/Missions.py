@@ -496,11 +496,18 @@ class Minmus_lander(Minmus_orbitor):
 		self.Land()
 		self.type = "Preset"
 
-class Duna_orbitor(Mission):
+class Duna_launch(Mission):
 		def __init__(self, alt=Duna().standard_launch_height, inc=0, type="Preset", name="Duna Orbitor", origin=Duna):
 			super().__init__(type, name, origin)
 			self.Launch(alt, inc)
 			self.type = "Preset"
+
+class Duna_transfer(Mission):
+	def __init__(self, target_p_alt=Duna().standard_launch_height, target_a_alt=Duna().standard_launch_height, inc=Duna().i, type="Preset", name="Duna Orb", origin=Kerbin):
+		super().__init__(type, name, origin)
+		self.Launch(Kerbin().standard_launch_height, 0)
+		self.Transfer(Kerbol, target_p_alt, target_a_alt)
+		
 
 # Example usage
 if __name__ == "__main__":
