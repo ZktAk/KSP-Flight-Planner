@@ -1,4 +1,3 @@
-import math
 from Bodies import *
 
 class Orbit:
@@ -34,7 +33,7 @@ class Mission:
 		self.maneuvers = []
 		self.orbits = []
 		body = origin()
-		self.orbits.append(Orbit(origin, body.radius, body.radius, 0))
+		self.orbits.append(Orbit(origin, 0, 0, 0))
 
 	def _add_maneuver(self, type, description, delta_v):
 		self.maneuvers.append(Maneuver(type, description, delta_v))
@@ -217,15 +216,20 @@ class Mission:
 
 		# Computation
 
+		print(inc)
+
 		R, mu, equatorial_Vol, drag_dv = (body.radius,
 										  body.mu,
 										  body.rotation_speed,
 										  body.atm_delta_v)
 
-		target_Rad = R + alt
-		vis, viva, _ = self._Hohmann_transfer(target_Rad)
+		vis, viva, _ = self._Hohmann_transfer(alt)
+
+		print(f'\nvis: {round(vis,1)} m/s\nviva: {round(viva,1)} m/s')
 
 		equatorial_orbit_V = pow(mu / R, 0.5)
+
+		print(f'v: {round(equatorial_orbit_V,1):,} m/s')
 
 		# At launch, we must first get up to the required speed for a theoretical circular orbit of altitude 0m.
 		# Assuming that our position once we accomplish this is at periphrasis (just for the sake of nomenclature
@@ -241,8 +245,11 @@ class Mission:
 		adjusted_ascension_dv = pow(pow(ascension_dv, 2) + pow(equatorial_Vol, 2) - (
 					2 * ascension_dv * equatorial_Vol * math.cos(math.pi * inc / 180)), 0.5)
 
+		print(f'\nburn1: {round(adjusted_ascension_dv, 1):,} m/s')
+		print(f'burn2: {round(viva, 1):,} m/s')
+
 		# Here we add on that drag delta-v factor as well as the delta-v required to circularize.
-		delta_v = round((adjusted_ascension_dv + drag_dv + viva) / 10) * 10
+		delta_v = math.ceil((adjusted_ascension_dv + drag_dv + viva)/10)*10
 
 		if Landing:
 			self._add_maneuver("Land",f"Controlled landing on {body.name}", delta_v)
@@ -506,8 +513,12 @@ class Duna_transfer(Mission):
 	def __init__(self, target_p_alt=Duna().standard_launch_height, target_a_alt=Duna().standard_launch_height, inc=Duna().i, type="Preset", name="Duna Orb", origin=Kerbin):
 		super().__init__(type, name, origin)
 		self.Launch(Kerbin().standard_launch_height, 0)
-		self.Transfer(Kerbol, target_p_alt, target_a_alt)
-		
+		#self.Change_Orbit(new_A_Alt=Kerbin().SOI-(1+Kerbin().radius))
+		self.Transfer(Kerbol, Kerbin().r_p, Kerbin().r_a)
+		# self.Change_Orbit(Kerbin().r_a, Duna().r_p, Duna().i)
+		# self.Transfer(Duna, target_p_alt, target_a_alt)
+		# self.Change_Orbit(target_p_alt, target_a_alt, inc)
+		#
 
 # Example usage
 if __name__ == "__main__":
