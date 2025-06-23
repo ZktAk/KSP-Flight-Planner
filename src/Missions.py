@@ -1,5 +1,8 @@
 from Bodies import *
 
+def pretty_ceil(num):
+	return math.ceil(num/10)*10
+
 class Orbit:
 	def __init__(self, body, p_alt, a_alt, inc):
 		self.parent = body
@@ -21,7 +24,6 @@ class Maneuver:
 		self.name = description
 		self.delta_v = delta_v
 
-
 class Mission:
 	def __init__(self, type="Custom", name="Unnamed Mission", origin=Kerbin):
 		self.type = type
@@ -36,7 +38,7 @@ class Mission:
 		self.orbits.append(Orbit(origin, 0, 0, 0))
 
 	def _add_maneuver(self, type, description, delta_v):
-		self.maneuvers.append(Maneuver(type, description, delta_v))
+		self.maneuvers.append(Maneuver(type, description, pretty_ceil(delta_v)))
 		self.type = "Custom"
 
 	def _add_orbit(self, p_alt, a_alt, inc):
@@ -142,6 +144,13 @@ class Mission:
 
 		return vis, viva, delta_v
 
+	def Hohmann_transfer(self, initial_rad, final_rad, mu):
+		a = (initial_rad + final_rad) / 2
+		vis = pow(mu / initial_rad, 0.5) * (pow(final_rad / a, 0.5) - 1)
+		viva = pow(mu / final_rad, 0.5) * (1 - pow(initial_rad / a, 0.5))
+		delta_v = round(vis + viva, 1)
+		return vis, viva, delta_v
+
 	def _Coplanar_transfer(self, final_P_Alt, final_A_Alt):
 		body = self.current_body()
 		R, mu = body.radius, body.mu
@@ -215,21 +224,18 @@ class Mission:
 			return
 
 		# Computation
-
-		print(inc)
-
 		R, mu, equatorial_Vol, drag_dv = (body.radius,
 										  body.mu,
 										  body.rotation_speed,
 										  body.atm_delta_v)
 
-		vis, viva, _ = self._Hohmann_transfer(alt)
+		vis, viva, _ = self.Hohmann_transfer(body.radius, body.radius+alt, body.mu)
 
-		print(f'\nvis: {round(vis,1)} m/s\nviva: {round(viva,1)} m/s')
+		# print(f'\nvis: {round(vis,1)} m/s\nviva: {round(viva,1)} m/s')
 
 		equatorial_orbit_V = pow(mu / R, 0.5)
 
-		print(f'v: {round(equatorial_orbit_V,1):,} m/s')
+		# print(f'v: {round(equatorial_orbit_V,1):,} m/s')
 
 		# At launch, we must first get up to the required speed for a theoretical circular orbit of altitude 0m.
 		# Assuming that our position once we accomplish this is at periphrasis (just for the sake of nomenclature
@@ -245,11 +251,11 @@ class Mission:
 		adjusted_ascension_dv = pow(pow(ascension_dv, 2) + pow(equatorial_Vol, 2) - (
 					2 * ascension_dv * equatorial_Vol * math.cos(math.pi * inc / 180)), 0.5)
 
-		print(f'\nburn1: {round(adjusted_ascension_dv, 1):,} m/s')
-		print(f'burn2: {round(viva, 1):,} m/s')
+		# print(f'\nburn1: {round(adjusted_ascension_dv, 1):,} m/s')
+		# print(f'burn2: {round(viva, 1):,} m/s')
 
 		# Here we add on that drag delta-v factor as well as the delta-v required to circularize.
-		delta_v = math.ceil((adjusted_ascension_dv + drag_dv + viva)/10)*10
+		delta_v = adjusted_ascension_dv + drag_dv + viva
 
 		if Landing:
 			self._add_maneuver("Land",f"Controlled landing on {body.name}", delta_v)
@@ -263,6 +269,7 @@ class Mission:
 		if body.atm_height != 0:
 			self.Change_Orbit(body.atm_height/2, self.orbits[-1].a_alt, atm_override=True)
 			self._add_maneuver("Land", f"Aerobrake landing on {body.name}", 0)
+			self.orbits.append(Orbit(body, 0, 0, 0))
 			self.launched = False
 		else:			
 			# Error catching			
@@ -273,7 +280,9 @@ class Mission:
 			
 			self._add_orbit(body.radius, body.radius ,inc)
 			self.launched = False
-			self.Launch(body.standard_launch_height, inc, Landing=True)		
+			self.Launch(body.standard_launch_height, inc, Landing=True)
+			self.orbits.append(Orbit(self.current_body, 0, 0, 0))
+
 
 	def Change_Orbit(self, new_P_Alt=None, new_A_Alt=None, new_i=None, atm_override=False):
 		# Error catching
@@ -321,81 +330,130 @@ class Mission:
 						n+=1
 
 			self._add_maneuver("Coplanar Orbit Change", description, self._Coplanar_transfer(new_P_Alt, new_A_Alt))
+			self._add_orbit(new_P_Alt, new_A_Alt, self.orbits[-1].i)
 
 		if new_i != self.orbits[-1].i:
 			change = {True: 'Increased', False: 'Decreased'}[new_i > self.orbits[-1].i]
 			description = f'{change} inclination to {new_i}°'
 			self._add_maneuver("Mid-course Inclination Change", description, self._Inclination_change(new_i))
+			self._add_orbit(new_P_Alt, new_A_Alt, new_i)
 
-		self._add_orbit(new_P_Alt, new_A_Alt, new_i)
-
-	def Transfer(self, target, final_P_Alt, final_A_Alt):
+	def Transfer(self, target, target_p_alt, target_a_alt=None):
+		target_a_alt = target_p_alt if target_a_alt is None else target_a_alt
 		current_body = self.current_body()
 		target_body = target()
-		logic = (target not in current_body.children) and (target is not current_body.parent)
+		logic = (target not in current_body.children) and (target is not current_body.parent) and (target_body.parent is not current_body.parent)
 		if self._break_check(logic, "Failure", "Transfer()",
 							 f'Cannot transfer to {target_body.name} from {current_body.name}. Mission construction aborted!',
 							 True):
 			return
 
-		if not self._valid_orbit(target, final_P_Alt, final_A_Alt, source='Transfer()', param='Orbit altitude', atm_override=True):
+		if not self._valid_orbit(target, target_p_alt, target_a_alt, source='Transfer()', param='Orbit altitude', atm_override=True):
 			return
 
 		if self._catch(self.orbits[-1].e != 0, "Warning", "Transfer()",
 					  f'Transfer orbit assumes initial orbit is circular. Added circularization maneuver to {self.orbits[-1].a_alt:,}m.'):
 			self.Change_Orbit(self.orbits[-1].a_alt, self.orbits[-1].a_alt)
 
-		initial_Alt = self.orbits[-1].a
+		initial_Alt = self.orbits[-1].a_alt
 
 		delta_v = None
 
+		def calculate():
+			child = current_body if target is current_body.parent else target_body
+			parent = child.parent()
+			parent_p_rad = parent.radius + target_p_alt if target is current_body.parent else self.orbits[-1].a
+			parent_a_rad = current_body.a if target is current_body.parent else child.a
+			child_alt = initial_Alt if target is current_body.parent else target_p_alt
+
+			vis, v2, _ = self.Hohmann_transfer(parent_p_rad, parent_a_rad, parent.mu)
+
+			if child.name == "Duna":
+				print(f'\nr1: {parent_p_rad:,} m')
+				print(f'r2: {parent_a_rad:,} m')
+				print(f'mu: {round(parent.mu/1_000_000_000_000):,} * 10^12')
+				print(f'Kerbin.mu: {round(Kerbin().mu/1_000_000_000)/1000:,}')
+				print(f'\nvis: {round(vis)} m/s')
+				print(f'v2: {round(v2)} m/s')
+
+			r1 = child.radius + child_alt
+			r2 = round(child.SOI / 1000) * 1000
+
+			mu = child.mu
+			v_e = round(pow(pow(v2, 2) + (2 * mu * (1 / r1 - 1 / r2)), 0.5))
+			v = round(pow(mu / r1, 0.5))
+			delta_v = v_e - v
+
+			return vis, delta_v
+
 		if target_body.parent is self.current_body:
-			initial_Rad = current_body.radius + initial_Alt
-			final_P_Rad = target_body.radius + final_P_Alt
-			final_A_Rad = target_body.radius + final_A_Alt
-
-			vis, viva, hohmann_v = self._Hohmann_transfer(target_body.a)
-			transfer_cost = vis
-
-			hyperbolic_v_p = pow(
-				pow(viva, 2) - 2 * target_body.mu * (1 / target_body.SOI - 1 / final_P_Rad), 0.5)
-
-			elliptical_v = pow(
-				target_body.mu * (2 / final_P_Rad - 2 / (final_P_Rad + final_A_Rad)), 0.5)
-
-			capture_cost = hyperbolic_v_p - elliptical_v
-			delta_v = transfer_cost + capture_cost
+			transfer, capture = calculate()
 
 			self._add_maneuver("Transfer",
-								 f"Transfer from {current_body.name} to {target_body.name}",
-												transfer_cost)
+								 f"Transfer from {current_body.name} to {target_body.name}", transfer)
 			self._add_orbit(self.orbits[-1].p_alt, target_body.a, self.orbits[-1].i)
-			
-	
+
+			if target_body.i != self.orbits[-1].i:
+				change = {True: 'Increased', False: 'Decreased'}[target_body.i > self.orbits[-1].i]
+				description = f'{change} inclination to {target_body.i}°'
+				self._add_maneuver("Mid-course Inclination Change", description, self._Inclination_change(target_body.i))
+				self._add_orbit(self.orbits[-1].p_alt, target_body.a, target_body.i)
+
 			self._add_maneuver("Capture",
-								 f"Capture into p_alt = {final_P_Alt:,}m, a_alt = {final_A_Alt:,}m orbit around {target_body.name}",
-												capture_cost)
-			self.current_body = target
-			self._add_orbit(final_P_Alt, final_A_Alt, self.orbits[-1].i)
+								 f"Capture into {target_p_alt:,}m circular orbit around {target_body.name}",
+												capture)
 
 		elif target is current_body.parent:
-			initial_Rad = current_body.radius + initial_Alt
-			final_P_Rad = target_body.radius + final_P_Alt
-
-			v1 = pow(current_body.mu / initial_Rad, 0.5)
-			a = (current_body.a + final_P_Rad) / 2
-			v_a = pow(target_body.mu * (2 / current_body.a - 1 / a), 0.5)
-			v = pow(target_body.mu / current_body.a, 0.5)
-			leaving_v = v - v_a
-			v_e = pow(pow(leaving_v, 2) + 2 * current_body.mu * (1 / initial_Rad - 1 / current_body.SOI), 0.5)
-
-			delta_v = v_e - v1
+			transfer, delta_v = calculate()
 
 			self._add_maneuver("Transfer and Capture",
-								 f"Transfer from {current_body.name} to {target_body.name} and capture into p_alt = {final_P_Alt:,}m, a_alt = {final_A_Alt:,}m orbit.",
+								 f"Transfer from {current_body.name} to {target_body.name} and capture into {target_p_alt:,}m circular orbit.",
 								 delta_v)
-			self.current_body = target
-			self._add_orbit(final_P_Alt, final_A_Alt, self.orbits[-1].i)
+
+		elif target_body.parent is current_body.parent:
+			ejection_speed, encounter_speed, _ = self.Hohmann_transfer(current_body.a, target_body.r_a, target().parent().mu)
+			# print(f'\nejection_speed: {round(ejection_speed)} m/s')
+			# print(f'capture_speed: {round(encounter_speed)} m/s')
+
+			mu = target().parent().mu
+			viva = pow(mu / target_body.r_p, 0.5) * (pow(target_body.r_a / target_body.a, 0.5) - 1)
+			# print(f'viva: {round(viva)} m/s')
+			encounter_speed -= viva
+			# print(f'capture_speed: {round(encounter_speed)} m/s')
+
+			mu = current_body.mu
+			r1 = self.orbits[-1].a
+			r2 = current_body.SOI
+			v2 = ejection_speed
+			v1 = pow(2*mu*(1/r1 - 1/r2) + pow(v2,2),0.5)
+			#print(v1)
+			v = pow(mu/r1,0.5)
+			#print(v)
+			ejection_burn = v1 - v
+			#print(f'\nejection_burn: {round(ejection_burn)} m/s')
+
+			self._add_maneuver("Ejection Burn",
+			                   f"Ejection out of {current_body.name}'s SOI on course to intercept {target_body.name}", ejection_burn)
+			self.current_body = target().parent
+			self._add_orbit(current_body.a, target_body.r_a, self.orbits[-1].i)
+
+			mu = target().mu
+			r1 = target().radius + target_p_alt
+			r2 = target().SOI
+			v2 = encounter_speed
+			v1 = pow(2 * mu * (1 / r1 - 1 / r2) + pow(v2, 2), 0.5)
+			#print(v1)
+			v = pow(mu/r1, 0.5)
+			#print(v)
+			capture_burn = v1 - v
+			#(f'capture_burn: {round(capture_burn)} m/s')
+
+			self._add_maneuver("Capture Burn",
+			                   f"Capture into {target_p_alt:,}m circular orbit around {target_body.name}",
+			                   capture_burn)
+
+		self.current_body = target
+		self._add_orbit(target_p_alt, target_a_alt, self.orbits[-1].i)
 
 	def print_power_bill(self, power_usage):
 		# power_usage in unit/s
@@ -439,7 +497,7 @@ class Mission:
 		print(f"\x1b[1;36m{'-' * 60}\x1b[0m\n")
 		return round(required_capacity)
 
-	def print_maneuver_bill(self, surplus_percent=10):
+	def print_maneuver_bill(self):
 		if self._break_check(not self.maneuvers,
 		                     'Failure',
 		                     'print_maneuver_bill()',
@@ -454,6 +512,7 @@ class Mission:
 
 		total_dv = 0
 		for i, m in enumerate(self.maneuvers, 1):
+			surplus_percent = 25 if m.type =="Land" else 10
 			print(f"\x1b[1;37mM{i}: {m.type:<20}\x1b[0m")
 			print(f"    \x1b[0;36m{m.name}")
 			print(f"    \x1b[1;32mΔv = {round(m.delta_v)} m/s\x1b[0m")
@@ -461,7 +520,7 @@ class Mission:
 			total_dv += m.delta_v
 
 		print(f"\x1b[1;36m{'-' * 60}")
-		print(f"Total Δv Requirement: {round(total_dv)} m/s\t|\tPlus {surplus_percent}%: {round(total_dv*(1+surplus_percent/100))}")
+		print(f"Total Δv Requirement: {round(total_dv)} m/s\t|\tPlus Margin : {round(total_dv*(1+surplus_percent/100))} m/s")
 		print(f"{'-' * 60}\x1b[0m\n")
 
 	def complete(self):
@@ -513,12 +572,11 @@ class Duna_transfer(Mission):
 	def __init__(self, target_p_alt=Duna().standard_launch_height, target_a_alt=Duna().standard_launch_height, inc=Duna().i, type="Preset", name="Duna Orb", origin=Kerbin):
 		super().__init__(type, name, origin)
 		self.Launch(Kerbin().standard_launch_height, 0)
-		#self.Change_Orbit(new_A_Alt=Kerbin().SOI-(1+Kerbin().radius))
-		self.Transfer(Kerbol, Kerbin().r_p, Kerbin().r_a)
-		# self.Change_Orbit(Kerbin().r_a, Duna().r_p, Duna().i)
-		# self.Transfer(Duna, target_p_alt, target_a_alt)
-		# self.Change_Orbit(target_p_alt, target_a_alt, inc)
-		#
+		self.Transfer(Duna, target_p_alt)
+		#self.Transfer(Kerbol, Kerbin().r_p-Kerbol().radius)
+		#self.Transfer(Mun, Mun().standard_launch_height)
+		#self.Transfer(Minmus, Minmus().standard_launch_height)
+
 
 # Example usage
 if __name__ == "__main__":

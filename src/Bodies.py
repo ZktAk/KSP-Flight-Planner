@@ -17,8 +17,9 @@ def sid2sol(T_sid, T):
 
 class Kerbol:
 	def __init__(self):
-		self.children = [Kerbin]
+		self.children = [Kerbin, Duna]
 		self.parent = None
+		self.name = "Kerbol"
 
 		# Physical properties
 		self.radius = 261_600_000                   # m
@@ -42,7 +43,7 @@ class Kerbin():
 		self.mass = 5.2915158E+22                   # kg
 		self.mu = 3.5316000E+12                     # m^3/s^2
 		self.g = self.mu / pow(self.radius, 2)      # m/s^2
-		self.SOI = 84159286                         # m from center
+		self.SOI = 84_159_286                       # m from center
 
 		# Rotational properties
 		self.rotation_period = 21549.425            # s, T_sid
@@ -52,7 +53,7 @@ class Kerbin():
 		# Atmospheric Properties
 		self.atm_height = 70000                     # m
 		self.standard_launch_height =80_000        # m
-		self.atm_delta_v = 1090                     # m/s
+		self.atm_delta_v = 1000                     # m/s
 
 		# Orbital parameters
 		self.a = 13_599_840_256                     # m from center
@@ -192,7 +193,7 @@ class Duna():
 		# Atmospheric Properties
 		self.atm_height = 50000                     # m
 		self.standard_launch_height = 60_000        # m
-		self.atm_delta_v = 480                     # m/s
+		self.atm_delta_v = 430                     # m/s
 
 		# Orbital parameters
 		self.a = 20_726_155_264                     # m from center
