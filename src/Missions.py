@@ -130,20 +130,6 @@ class Mission:
 
 		return True
 
-	def _Hohmann_transfer(self, final_Alt):
-		body = self.current_body()
-		mu = body.mu
-
-		initial_Rad = self.orbits[-1].a
-		final_Rad = body.radius + final_Alt
-		a = (initial_Rad + final_Rad) / 2
-
-		vis = pow(mu / initial_Rad, 0.5) * (pow(final_Rad / a, 0.5) - 1)
-		viva = pow(mu / final_Rad, 0.5) * (1 - pow(initial_Rad / a, 0.5))
-		delta_v = round(vis + viva, 1)
-
-		return vis, viva, delta_v
-
 	def Hohmann_transfer(self, initial_rad, final_rad, mu):
 		a = (initial_rad + final_rad) / 2
 		vis = pow(mu / initial_rad, 0.5) * (pow(final_rad / a, 0.5) - 1)
