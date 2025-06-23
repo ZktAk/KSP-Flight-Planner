@@ -47,8 +47,8 @@ class Mission:
 			# print(f'\x1b[{'1;31'}m {"Failure"} \x1b[0m')
 
 			if self.ignore_errors and severity != 'Failure': return False
-			raise Warning(f'{color[severity]}{severity} in {source}\x1b[0m: {message}')
-			#print(f'{color[severity]}{severity} in {source}\x1b[0m: {message}')
+			raise Warning(f'{color[severity]}{severity} in {source}\x1b[0m: {message}')  # this line is only for development debugging and should be removed for production
+			print(f'{color[severity]}{severity} in {source}\x1b[0m: {message}')
 			if abort:
 				self.aborted = True
 			return True
@@ -503,8 +503,6 @@ class Mission:
 
 	def complete(self):
 		return self.orbits[-1]
-
-
 
 # Example usage
 if __name__ == "__main__":

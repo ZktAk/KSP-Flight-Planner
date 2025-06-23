@@ -1,6 +1,6 @@
 from  Missions import Mission 
 from Bodies import *
-from Antennas import *
+from antenna_types import *
 from CommNet import *
 from mission_presets import *
 

@@ -1,5 +1,5 @@
 from Missions import Orbit
-import Antennas
+import antenna_types
 from Bodies import *
 
 class Satellite():
