@@ -1,4 +1,5 @@
 from Bodies import *
+import warnings
 
 def pretty_ceil(num):
 	return math.ceil(num/10)*10
@@ -25,21 +26,27 @@ class Maneuver:
 		self.delta_v = delta_v
 
 class Mission:
-	def __init__(self, type="Custom", name="Unnamed Mission", origin=Kerbin):
+	def __init__(self, type="Custom", name="Unnamed Mission", origin=Kerbin, building_preset=False, ignore_errors=None):
 		self.type = type
 		self.name = name
 		self.origin = self.current_body = origin
 		self.launched = False
 		self.aborted = False
+		self.ignore_errors = building_preset if ignore_errors is None else ignore_errors
+		self.building_preset = building_preset
 
 		self.maneuvers = []
 		self.orbits = []
 		body = origin()
 		self.orbits.append(Orbit(origin, 0, 0, 0))
 
+	def _finish_preset(self):
+		self.building_preset = self.ignore_errors = False
+
 	def _add_maneuver(self, type, description, delta_v):
 		self.maneuvers.append(Maneuver(type, description, pretty_ceil(delta_v)))
-		self.type = "Custom"
+		if not self.building_preset:
+			self.type = "Custom"
 
 	def _add_orbit(self, p_alt, a_alt, inc):
 		self.orbits.append(Orbit(self.current_body, p_alt, a_alt, inc))
@@ -57,7 +64,9 @@ class Mission:
 			# print(f'\x1b[{'1;33'}m {"Error"} \x1b[0m')
 			# print(f'\x1b[{'1;31'}m {"Failure"} \x1b[0m')
 
-			print(f'{color[severity]}{severity} in {source}\x1b[0m: {message}')
+			if self.ignore_errors and severity != 'Failure': return False
+			raise Warning(f'{color[severity]}{severity} in {source}\x1b[0m: {message}')
+			#print(f'{color[severity]}{severity} in {source}\x1b[0m: {message}')
 			if abort:
 				self.aborted = True
 			return True
@@ -514,52 +523,53 @@ class Mission:
 		return self.orbits[-1]
 
 class Kerbin_orbitor(Mission):
-	def __init__(self, alt=Kerbin().standard_launch_height, inc=0, type="Preset", name="Kerbin Orbitor", origin=Kerbin):
+	def __init__(self, alt=Kerbin().standard_launch_height, inc=0, type="Preset", name="Kerbin Orbitor", origin=Kerbin, building_preset=False):
 		super().__init__(type, name, origin)
 		self.Launch(alt, inc)
-		self.type = "Preset"
+		if not building_preset: self._finish_preset()
 
 class Munar_orbitor(Mission):
-	def __init__(self, target_p_alt=Mun().standard_launch_height, target_a_alt=Mun().standard_launch_height, inc=Mun().i, type="Preset", name="Munar Orbitor", origin=Kerbin):
+	def __init__(self, target_p_alt=Mun().standard_launch_height, target_a_alt=Mun().standard_launch_height, inc=Mun().i, type="Preset", name="Munar Orbitor", origin=Kerbin, building_preset=False):
 		body = Mun
-		super().__init__(type, name, origin)
+		super().__init__(type, name, origin, building_preset=True)
 		self.Launch(Kerbin().standard_launch_height, body().i)
 		self.Transfer(body, target_p_alt, target_a_alt)
 		self.Change_Orbit(target_p_alt, target_a_alt, inc)
-		self.type = "Preset"
+		if not building_preset: self._finish_preset()
 
 class Minmus_orbitor(Mission):
-	def __init__(self, target_p_alt=Minmus().standard_launch_height, target_a_alt=Minmus().standard_launch_height, inc=Minmus().i, type="Preset", name="Minmus Orbitor", origin=Kerbin):
+	def __init__(self, target_p_alt=Minmus().standard_launch_height, target_a_alt=Minmus().standard_launch_height, inc=Minmus().i, type="Preset", name="Minmus Orbitor", origin=Kerbin, building_preset=False):
 		body = Minmus
-		super().__init__(type, name, origin)
+		super().__init__(type, name, origin, building_preset=True)
 		self.Launch(Kerbin().standard_launch_height, body().i)
 		self.Transfer(body, target_p_alt, target_a_alt)
 		self.Change_Orbit(target_p_alt, target_a_alt, inc)
-		self.type = "Preset"
+		if not building_preset: self._finish_preset()
 		
 class Munar_lander(Munar_orbitor):
-	def __init__(self, type="Preset", name="Mun Lander", origin=Kerbin):
+	def __init__(self, type="Preset", name="Mun Lander", origin=Kerbin, building_preset=False):
 		super().__init__(type=type, name=name, origin=origin)
 		self.Land()
-		self.type = "Preset"
+		if not building_preset: self._finish_preset()
 
 class Minmus_lander(Minmus_orbitor):
-	def __init__(self, type="Preset", name="Minmus Lander", origin=Kerbin):
-		super().__init__(type=type, name=name, origin=origin)
+	def __init__(self, type="Preset", name="Minmus Lander", origin=Kerbin, building_preset=False):
+		super().__init__(type=type, name=name, origin=origin, building_preset=True)
 		self.Land()
-		self.type = "Preset"
+		if not building_preset: self._finish_preset()
 
 class Duna_launch(Mission):
-		def __init__(self, alt=Duna().standard_launch_height, inc=0, type="Preset", name="Duna Orbitor", origin=Duna):
-			super().__init__(type, name, origin)
-			self.Launch(alt, inc)
-			self.type = "Preset"
+	def __init__(self, alt=Duna().standard_launch_height, inc=0, type="Preset", name="Duna Orbitor", origin=Duna, building_preset=False):
+		super().__init__(type, name, origin)
+		self.Launch(alt, inc)
+		if not building_preset: self._finish_preset()
 
 class Duna_transfer(Mission):
-	def __init__(self, target_p_alt=Duna().standard_launch_height, target_a_alt=Duna().standard_launch_height, inc=Duna().i, type="Preset", name="Duna Orb", origin=Kerbin):
+	def __init__(self, target_p_alt=Duna().standard_launch_height, target_a_alt=Duna().standard_launch_height, inc=Duna().i, type="Preset", name="Duna Orb", origin=Kerbin, building_preset=False):
 		super().__init__(type, name, origin)
 		self.Launch(Kerbin().standard_launch_height, 0)
 		self.Transfer(Duna, target_p_alt)
+		if not building_preset: self._finish_preset()
 		#self.Transfer(Kerbol, Kerbin().r_p-Kerbol().radius)
 		#self.Transfer(Mun, Mun().standard_launch_height)
 		#self.Transfer(Minmus, Minmus().standard_launch_height)

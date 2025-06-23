@@ -11,8 +11,8 @@ if __name__ == "__main__":
   # mission.Transfer(Kerbin, 25_000, Minmus().a - Kerbin().radius)
   #mission = Munar_orbitor(355_291-Mun().radius, 567_834-Mun().radius)
   mission = Minmus_lander()
-  mission.Launch()
-  mission.Transfer(Kerbin, 35_000, Minmus().a)
+  #mission.Launch()
+  #mission.Transfer(Kerbin, 35_000, Minmus().a)
   mission.print_maneuver_bill()
 
   #mission.print_power_bill(10)
