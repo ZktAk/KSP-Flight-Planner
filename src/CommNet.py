@@ -158,5 +158,4 @@ class CommNet:
 
 		x_max = 1 - (distance / sat_range)
 		min_strength = -2 * pow(x_max, 3) + 3 * pow(x_max, 2)
-		return min_strength
-	
+		return min_strength	
