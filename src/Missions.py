@@ -505,22 +505,23 @@ class Mission:
 		                     True):
 			return
 
-
 		print(f"\n\x1b[1;36m{'=' * 60}")
 		print(f"Δv Budget Summary for Mission: {self.name} ({self.type})")
 		print(f"{'=' * 60}\x1b[0m")
 
 		total_dv = 0
-		for i, m in enumerate(self.maneuvers, 1):
+		total_surplus = 0
+		for i, m in enumerate(self.maneuvers, 1):			
 			surplus_percent = 25 if m.type =="Land" else 10
+			total_surplus += pretty_ceil(m.delta_v*(1+surplus_percent/100))
 			print(f"\x1b[1;37mM{i}: {m.type:<20}\x1b[0m")
 			print(f"    \x1b[0;36m{m.name}")
-			print(f"    \x1b[1;32mΔv = {round(m.delta_v)} m/s\x1b[0m")
-			print(f"    \x1b[1;32m+{surplus_percent}% = {round(m.delta_v*(1+surplus_percent/100))} m/s\x1b[0m\n")
+			print(f"    \x1b[1;32mΔv = {m.delta_v} m/s\x1b[0m")
+			print(f"    \x1b[1;32m+{surplus_percent}% = {pretty_ceil(m.delta_v*(1+surplus_percent/100))} m/s\x1b[0m\n")
 			total_dv += m.delta_v
 
 		print(f"\x1b[1;36m{'-' * 60}")
-		print(f"Total Δv Requirement: {round(total_dv)} m/s\t|\tPlus Margin : {round(total_dv*(1+surplus_percent/100))} m/s")
+		print(f"Minimum Δv Requirement: {total_dv} m/s\t|\tPlus Margin : {total_surplus} m/s")
 		print(f"{'-' * 60}\x1b[0m\n")
 
 	def complete(self):

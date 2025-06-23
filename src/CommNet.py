@@ -114,8 +114,8 @@ class CommNet:
 		print(f"DNS Signal Path Strength Summary")
 		print(f"{'=' * 60}\x1b[0m\n")
 
-		print(f"\x1b[1;37mTarget Min Strength:\x1b[0m           \x1b[1;32m{round(target_strength*100)}%\x1b[0m")
-		print(f"\x1b[1;37mFound Max Strength:\x1b[0m            \x1b[1;32m{round(strength*100)}%\x1b[0m\n")
+		print(f"\x1b[1;37mTarget Strength:\x1b[0m           \x1b[1;32m{round(target_strength*100)}%\x1b[0m")
+		print(f"\x1b[1;37mFound Strength:\x1b[0m            \x1b[1;32m{round(strength*100)}%\x1b[0m\n")
 		print(f"\x1b[1;36m{'-' * 60}\x1b[0m\n")		
 	
 
