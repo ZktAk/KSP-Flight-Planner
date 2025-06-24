@@ -1,6 +1,6 @@
-from Missions import Orbit
-import antenna_types
-from Bodies import *
+from models.orbit_model import Orbit
+from models.antenna_models import *
+from utils.bodies import *
 
 class Satellite():
 	def __init__(self, orbit, power, DSN, comm_type='Direct'):

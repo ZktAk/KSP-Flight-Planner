@@ -5,13 +5,12 @@ Improve workflow:
 
   - At the start, the user knows where they want the satellite to be, desired antenna type, and its power usage.
 
-Add option to ignore console errors and warnings for mission presets.
 
 Add intuative manuever grouping in bill printing.
 
 Remove "_" functions or rework them to be less clunky.
 
-Validate inclination change in Transfer funcgtion
+Validate inclination change in Transfer function
 
 Validtae all inclination changes
 

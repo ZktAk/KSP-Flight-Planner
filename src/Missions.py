@@ -1,6 +1,6 @@
-from Bodies import *
-from orbit_model import Orbit
-from maneuver_model import Maneuver
+from utils.bodies import *
+from models.orbit_model import Orbit
+from models.maneuver_model import Maneuver
 import math
 import warnings
 
@@ -47,7 +47,7 @@ class Mission:
 			# print(f'\x1b[{'1;31'}m {"Failure"} \x1b[0m')
 
 			if self.ignore_errors and severity != 'Failure': return False
-			raise Warning(f'{color[severity]}{severity} in {source}\x1b[0m: {message}')  # this line is only for development debugging and should be removed for production
+			#raise Warning(f'{color[severity]}{severity} in {source}\x1b[0m: {message}')  # this line is only for development debugging and should be removed for production
 			print(f'{color[severity]}{severity} in {source}\x1b[0m: {message}')
 			if abort:
 				self.aborted = True
@@ -388,11 +388,11 @@ class Mission:
 								 delta_v)
 
 		elif target_body.parent is current_body.parent:
-			ejection_speed, encounter_speed, _ = self.Hohmann_transfer(current_body.a, target_body.r_a, target().parent().mu)
+			ejection_speed, encounter_speed, _ = self.Hohmann_transfer(current_body.a, target_body.r_a, target().parent.mu)
 			# print(f'\nejection_speed: {round(ejection_speed)} m/s')
 			# print(f'capture_speed: {round(encounter_speed)} m/s')
 
-			mu = target().parent().mu
+			mu = target().parent.mu
 			viva = pow(mu / target_body.r_p, 0.5) * (pow(target_body.r_a / target_body.a, 0.5) - 1)
 			# print(f'viva: {round(viva)} m/s')
 			encounter_speed -= viva
