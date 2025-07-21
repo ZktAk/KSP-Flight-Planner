@@ -1,7 +1,12 @@
-def Inclination_change(body, r_p, r_a, initial_i, new_i):
+def Inclination_change(initial_orbit, target_orbit):
   import math
   
-  mu = body.mu
+  mu = initial_orbit.body().mu
+  r_p = initial_orbit.r_p
+  r_a = initial_orbit.r_a
+  initial_i = initial_orbit.i
+  new_i = target_orbit.i
+
   alpha = 2 / (r_a + r_p)
   a_Vol = pow(mu * (2 / r_a - alpha), 0.5)
   delta_i = new_i - initial_i

@@ -1,6 +1,6 @@
 from models.orbit_model import Orbit
 from models.antenna_models import *
-from utils.bodies import *
+from utils.import_bodies import *
 
 class Satellite():
 	def __init__(self, orbit, power, DSN, comm_type='Direct'):
@@ -47,7 +47,7 @@ class Satellite():
 
 	def _strength(self):
 		min_distance = max_distance = 0
-		body = self.orbit.parent
+		body = self.orbit.body
 
 		if body is Kerbin:
 			min_distance = self.orbit.p_alt
@@ -89,19 +89,19 @@ class CommNet:
 	def max_distance_between(self, sat_a, sat_b):
 		# a method to calculate the maximum theoretical distance between two satellites
 
-		if sat_a.orbit.parent is sat_b.orbit.parent:
+		if sat_a.orbit.body is sat_b.orbit.body:
 			# satallites of same body
 			return (sat_a.orbit.r_a + sat_b.orbit.r_a)
-		elif sat_a.orbit.parent().parent is sat_b.orbit.parent().parent:
+		elif sat_a.orbit.body().parent is sat_b.orbit.body().parent:
 			# satallites of bodies who share the same parent: Kerbin's moon and Duna's moon
 			# max distance sum of the body's plus satellite's apoapsis
-			return (sat_a.orbit.parent().r_a + sat_a.orbit.r_a) + (sat_b.orbit.parent().r_a + sat_b.orbit.r_a)
-		elif sat_a.orbit.parent is sat_b.orbit.parent().parent:
+			return (sat_a.orbit.body().r_a + sat_a.orbit.r_a) + (sat_b.orbit.body().r_a + sat_b.orbit.r_a)
+		elif sat_a.orbit.body is sat_b.orbit.body().parent:
 			# sat_a is moon of body, sat_b is orbiting moon of body
-			return (sat_a.orbit.r_a + sat_b.orbit.parent().r_a + sat_b.orbit.r_a)
-		elif sat_a.orbit.parent().parent is sat_b.orbit.parent:
+			return (sat_a.orbit.r_a + sat_b.orbit.body().r_a + sat_b.orbit.r_a)
+		elif sat_a.orbit.body().parent is sat_b.orbit.body:
 			# sat_b is moon of body, sat_a is orbiting moon of body
-			return (sat_a.orbit.parent().r_a + sat_a.orbit.r_a + sat_b.orbit.r_a)
+			return (sat_a.orbit.body().r_a + sat_a.orbit.r_a + sat_b.orbit.r_a)
 		else:
 			print("SHOULD NOT GET HERE")
 

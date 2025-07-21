@@ -1,19 +1,19 @@
 from Missions import Mission 
-from utils.bodies import *
+from utils.import_bodies import *
 from models.antenna_models import *
 from CommNet import *
 from mission_presets import *
 
 if __name__ == "__main__":
 
-  #mission = Mission(origin = Mun)
-  #mission.Launch(14_000)
-  # mission.Transfer(Kerbin, 25_000, Minmus().a - Kerbin().radius)
+  mission = Mission(origin = Kerbin)
+  mission.Launch(80_000)
+  mission.Transfer(Minmus, 14_000, 14_000)
   #mission = Munar_orbitor(355_291-Mun().radius, 567_834-Mun().radius)
-  mission = Minmus_orbitor()
-  mission.Change_Orbit(100_000, 100_000, 12)
-  #mission.Launch()
-  #mission.Transfer(Kerbin, 35_000, Minmus().a)
+  # mission = Minmus_orbitor()
+  # mission.Change_Orbit(100_000, 100_000, 12)
+  # #mission.Launch()
+  # #mission.Transfer(Kerbin, 35_000, Minmus().a)
   mission.print_maneuver_bill()
 
   #mission.print_power_bill(10)

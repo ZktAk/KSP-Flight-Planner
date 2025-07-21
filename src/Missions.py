@@ -1,13 +1,13 @@
-from utils.bodies import *
-from models.orbit_model import Orbit
-from maneuvers.launch import launch
-from maneuvers.inclination_change import Inclination_change
-from maneuvers.coplanar_transfer import Coplanar_transfer
-from models.maneuver_model import Maneuver
+from src.utils.import_bodies import *
+from src.models.orbit_model import Orbit
+from src.maneuvers.launch import launch
+from src.maneuvers.inclination_change import Inclination_change
+from src.maneuvers.coplanar_transfer import Coplanar_transfer
+from src.models.maneuver_model import Maneuver
 import math
 import warnings
-from maneuvers.hohmann_transfer import Hohmann_transfer
-from mission_error_catching import catch, break_check, valid_orbit
+from src.maneuvers.hohmann_transfer import Hohmann_transfer
+from src.mission_error_catching import catch, break_check, valid_orbit
 
 def pretty_ceil(num):
 	return math.ceil(num/10)*10
@@ -42,7 +42,9 @@ class Mission:
 		return Coplanar_transfer(self.current_body(), self.orbits[-1].r_p, self.orbits[-1].r_a, final_P_Alt, final_A_Alt)		
 
 	def _Inclination_change(self, new_inc):
-		return Inclination_change(self.current_body(), self.orbits[-1].r_p, self.orbits[-1].r_a, self.orbits[-1].i, new_inc)
+		orbit1 = self.orbits[-1]
+		orbit2 = Orbit(self.orbits[-1].body, self.orbits[-1].p_alt, self.orbits[-1].a_alt, new_inc)
+		return Inclination_change(orbit1, orbit2)
 
 	def Launch(self, alt=None, inc=0, Landing=False):
 
@@ -65,7 +67,7 @@ class Mission:
 			return
 
 		# Computation
-		delta_v = launch(body, alt, inc)		
+		delta_v = launch(body, alt, inc)
 
 		# Add maneuver
 		if Landing:
@@ -221,11 +223,11 @@ class Mission:
 								 delta_v)
 
 		elif target_body.parent is current_body.parent:
-			ejection_speed, encounter_speed, _ = Hohmann_transfer(current_body.a, target_body.r_a, target().parent.mu)
+			ejection_speed, encounter_speed, _ = Hohmann_transfer(current_body.a, target_body.r_a, target().parent().mu)
 			# print(f'\nejection_speed: {round(ejection_speed)} m/s')
 			# print(f'capture_speed: {round(encounter_speed)} m/s')
 
-			mu = target().parent.mu
+			mu = target().parent().mu
 			viva = pow(mu / target_body.r_p, 0.5) * (pow(target_body.r_a / target_body.a, 0.5) - 1)
 			# print(f'viva: {round(viva)} m/s')
 			encounter_speed -= viva

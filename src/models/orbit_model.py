@@ -1,7 +1,7 @@
-import math
 class Orbit:
   def __init__(self, body, p_alt, a_alt, inc):
-    self.parent = body
+    import math
+    self.body = body
     body = body()
     self.p_alt = p_alt
     self.a_alt = a_alt
