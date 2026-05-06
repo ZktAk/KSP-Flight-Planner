@@ -1,5 +1,5 @@
-from src.models.orbit_model import Orbit
-from src.utils.import_bodies import *
+from models.orbit_model import Orbit
+from utils.import_bodies import *
 
 
 def _speed_at_periapsis_flyby(body, periapsis, speed_at_SOI):
@@ -18,8 +18,8 @@ def circular_v(mu, r):
     return eliptical_v(mu, r, r)
 
 def _transfer_to_child(parent_orbit, child_orbit):
-    from src.maneuvers.hohmann_transfer import Hohmann_transfer
-    from src.maneuvers.inclination_change import Inclination_change
+    from maneuvers.hohmann_transfer import Hohmann_transfer
+    from maneuvers.inclination_change import Inclination_change
     r1 = parent_orbit.a
     r2 = child_orbit.body().r_a
     
@@ -51,7 +51,7 @@ def _transfer_and_capture_to_parent(parent_orbit, child_orbit):
     return capture_delta_v, transfer_delta_v
 
 def _transfer_and_capture_to_sibling(original_orbit, target_orbit=None):
-    from src.maneuvers.hohmann_transfer import Hohmann_transfer
+    from maneuvers.hohmann_transfer import Hohmann_transfer
     
     original_body = original_orbit.body()
     target_body = target_orbit.body()
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
 
 # def Transfer(initial_orbit, target_orbit):
-#     from src.models.orbit_model import Orbit
+#     from models.orbit_model import Orbit
 #     initial_body_type = initial_orbit.body
 #     initial_body = initial_body_type()
 #     initial_r_p = initial_orbit.r_p

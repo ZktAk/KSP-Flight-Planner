@@ -1,4 +1,4 @@
-from src.utils.body_registry import register_body, get_body
+from utils.body_registry import register_body, get_body
 
 class CelestialBody:
     def __init__(self):

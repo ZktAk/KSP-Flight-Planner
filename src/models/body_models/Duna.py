@@ -1,7 +1,7 @@
-from src.utils.body_registry import register_body, get_body
-from src.models.body_models.Base_Class import CelestialBody
-from src.utils.body_hierarchy import *
-from src.utils.body_math_utils import *
+from utils.body_registry import register_body, get_body
+from models.body_models.Base_Class import CelestialBody
+from utils.body_hierarchy import *
+from utils.body_math_utils import *
 import math
 
 class Duna(CelestialBody):

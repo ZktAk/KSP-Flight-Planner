@@ -1,13 +1,13 @@
-from src.utils.import_bodies import *
-from src.models.orbit_model import Orbit
-from src.maneuvers.launch import launch
-from src.maneuvers.inclination_change import Inclination_change
-from src.maneuvers.coplanar_transfer import Coplanar_transfer
-from src.models.maneuver_model import Maneuver
+from utils.import_bodies import *
+from models.orbit_model import Orbit
+from maneuvers.launch import launch
+from maneuvers.inclination_change import Inclination_change
+from maneuvers.coplanar_transfer import Coplanar_transfer
+from models.maneuver_model import Maneuver
 import math
 import warnings
-from src.maneuvers.hohmann_transfer import Hohmann_transfer
-from src.mission_error_catching import catch, break_check, valid_orbit
+from maneuvers.hohmann_transfer import Hohmann_transfer
+from mission_error_catching import catch, break_check, valid_orbit
 
 def pretty_ceil(num):
 	return math.ceil(num/10)*10
