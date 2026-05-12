@@ -29,7 +29,7 @@ repo.
 
 
 # Planned Additions
-1. Spacecraft Construction: Add antennas and power systems to a spacecraft object and get battery sizing recommendations based on selected hardware.
+1. Spacecraft Construction & Power Sizing: Add antennas and power systems to a spacecraft object and get battery sizing recommendations based on selected hardware. The battery calculator will account for solar panel size, time spent in eclipse of the current orbital body, and — where applicable — time spent in the eclipse shadow of that body's parent.
 2. KOS Script Generation: Automatically output a Kerbol Operating System script to fully automate the planned flight.
 3. Orbit-Origin Missions: Currently all missions must begin from a launch off a planetary surface. A planned addition will allow missions to start from an existing orbit, enabling mid-flight replanning and multi-leg mission chaining.
 
@@ -45,15 +45,32 @@ The general flow of the planner mirrors a real KSP mission plan:
 Battery sizing and KOS script output will slot into step 5 once implemented.
 # Example Usage Script
 ```python
-from src.Missions import Mission
-from src.models.body_models.Kerbin import Kerbin
-from src.models.body_models.Minmus import Minmus
+from Missions import Mission 
+from utils.import_bodies import *
+from models.antenna_models import *
+from CommNet import *
+from mission_presets import *
 
-m = Mission(origin=Kerbin)
-m.Launch(80000)
-m.Transfer(Minmus, 14000, 14000)
-m.print_maneuver_bill()
+if __name__ == "__main__":
 
-orbit = m.complete()
+  mission = Mission(origin = Kerbin)
+  mission.Launch(80_000)
+  mission.Transfer(Minmus, 14_000, 14_000)
+
+  mission.print_maneuver_bill()
+
+  orbit = mission.complete()
+  commNet = CommNet(tier=2)
+
+  test_sat = Satellite(orbit, 0, commNet.DSN, comm_type='Direct')
+  test_sat.add_antenna(Communotron_16)
+  commNet.query_signal_strength(test_sat)
+
+  power_usage = Communotron_16.electricity * Communotron_16.speed
+
+  mission.print_power_bill(power_usage)
 ```
+#### Example Output
+![alt text](ExampleOutput.png)
+
 Use `src/main.py` for a full demo that also creates a `CommNet` and queries antenna signal strength.
