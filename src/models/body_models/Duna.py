@@ -1,7 +1,6 @@
 from utils.body_registry import register_body, get_body
 from models.body_models.Base_Class import CelestialBody
 from utils.body_hierarchy import *
-from maneuvers.launch import launch
 from utils.body_math_utils import *
 import math
 
@@ -19,7 +18,17 @@ class Duna(CelestialBody):
     self.mass = 4.5154270E+21                   # kg
     self.mu = 3.0136321E+11                     # m^3/s^2
     self.g = self.mu / pow(self.radius, 2)      # m/s^2
-    self.SOI = 47921949                         # m from center    
+    self.SOI = 47921949                         # m from center
+
+    # Rotational properties
+    self.rotation_period = 65517.859            # s, T_sid
+    self.solar_day = 65766.707                  # s, T_sol
+    self.rotation_speed = 30.688                # m/s
+
+    # Atmospheric Properties
+    self.atm_height = 50000                     # m
+    self.standard_launch_height = 60_000        # m
+    self.atm_delta_v = 430                     # m/s
 
     # Orbital parameters
     self.a = 20_726_155_264                     # m from center
@@ -35,21 +44,6 @@ class Duna(CelestialBody):
                      parent.mu,
                      0.5)
                    )
-
-    # Rotational properties
-    self.rotation_period = 65517.859            # s, T_sid
-    self.solar_day = 65766.707                  # s, T_sol
-    self.rotation_speed = 30.688                # m/s
-
-    # Atmospheric Properties
-    self.atm_height = 50000                     # m
-    self.standard_launch_height = 60_000        # m
-    self.average_launch_cost = 1450             # m/s
-    self.launch_loss_factor = launch(           # m/s
-        self, 
-        alt=self.standard_launch_height,
-        inc=0, 
-        calculate_losses=True)
 
     # Rotational properties
     # self.solar_day = 65766.707                  # s, T_sol

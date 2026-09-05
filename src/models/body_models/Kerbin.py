@@ -1,7 +1,6 @@
 from utils.body_registry import register_body, get_body
 from models.body_models.Base_Class import CelestialBody
 from utils.body_hierarchy import *
-from maneuvers.launch import launch
 from utils.body_math_utils import *
 import math
 
@@ -29,12 +28,7 @@ class Kerbin(CelestialBody):
     # Atmospheric Properties
     self.atm_height = 70000                     # m
     self.standard_launch_height = 80_000        # m
-    self.average_launch_cost = 3400             # m/s
-    self.launch_loss_factor = launch(           # m/s
-        self, 
-        alt=self.standard_launch_height,
-        inc=0, 
-        calculate_losses=True)
+    self.atm_delta_v = 1000                     # m/s
 
     # Orbital parameters
     self.a = 13_599_840_256                     # m from center

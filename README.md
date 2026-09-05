@@ -71,6 +71,6 @@ if __name__ == "__main__":
   mission.print_power_bill(power_usage)
 ```
 #### Example Output
-![alt text](src/images/ExampleOutput.png)
+![alt text](ExampleOutput.png)
 
 Use `src/main.py` for a full demo that also creates a `CommNet` and queries antenna signal strength.
