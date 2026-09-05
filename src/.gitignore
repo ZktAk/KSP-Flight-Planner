@@ -1,0 +1,7 @@
+# Default ignored files
+.idea/
+.venv/
+src/__pycache__/
+src/manual/__pycache__/
+src/models/__pycache__/
+src/utils/__pycache__/
