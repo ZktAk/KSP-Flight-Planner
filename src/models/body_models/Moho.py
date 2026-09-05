@@ -1,6 +1,7 @@
 from utils.body_registry import register_body, get_body
 from models.body_models.Base_Class import CelestialBody
 from utils.body_hierarchy import *
+from maneuvers.launch import launch
 from utils.body_math_utils import *
 import math
 
@@ -19,17 +20,7 @@ class Moho(CelestialBody):
 		self.mass = 2.5263314E+21  # kg
 		self.mu = 1.6860938E+11  # m^3/s^2
 		self.g = self.mu / pow(self.radius, 2)  # m/s^2
-		self.SOI = 9_646_663  # m from center
-		
-		# Rotational properties
-		self.rotation_period = 1_210_000.0  # s, T_sid
-		self.solar_day = 2_665_723.4  # s, T_sol
-		self.rotation_speed = 1.2982  # m/s
-		
-		# Atmospheric Properties
-		self.atm_height = 0  # m
-		self.standard_launch_height = 20_000  # m
-		self.atm_delta_v = 0  # m/s
+		self.SOI = 9_646_663  # m from center		
 		
 		# Orbital parameters
 		self.a = 5_263_138_304  # m from center
@@ -46,6 +37,21 @@ class Moho(CelestialBody):
 			               0.5)
 		               )
 		
+		# Rotational properties
+		self.rotation_period = 1_210_000.0  # s, T_sid
+		self.solar_day = 2_665_723.4  # s, T_sol
+		self.rotation_speed = 1.2982  # m/s
+		
+		# Atmospheric Properties
+		self.atm_height = 0  # m
+		self.standard_launch_height = 20_000  # m
+		self.average_launch_cost = 870  # m/s
+		self.launch_loss_factor = launch(           # m/s
+        self, 
+        alt=self.standard_launch_height,
+        inc=0, 
+        calculate_losses=True)
+
 		# # Rotational properties
 		# self.solar_day = 21600.000  # s, T_sol
 		# self.rotation_period = sol2sid(  # s, T_sid

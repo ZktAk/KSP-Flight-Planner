@@ -1,6 +1,7 @@
 from utils.body_registry import register_body, get_body
 from models.body_models.Base_Class import CelestialBody
 from utils.body_hierarchy import *
+from maneuvers.launch import launch
 from utils.body_math_utils import *
 import math
 
@@ -18,12 +19,7 @@ class Mun(CelestialBody):
     self.mass = 9.7599066E+20                   # kg
     self.mu = 6.5138398E+10                     # m^3/s^2
     self.g = self.mu / pow(self.radius, 2)      # m/s^2
-    self.SOI = 2429559.1                        # m from center
-
-    # Atmospheric Properties
-    self.atm_height = 0                         # m
-    self.standard_launch_height = 14_000        # m
-    self.atm_delta_v = 0                        # m/s
+    self.SOI = 2429559.1                        # m from center    
 
     # Orbital parameters
     self.a = 12_000_000                         # m from center
@@ -52,3 +48,13 @@ class Mun(CelestialBody):
              self.rotation_period,
              parent.period)
     self.rotation_speed = 9.0416                # m/s
+
+    # Atmospheric Properties
+    self.atm_height = 0                         # m
+    self.standard_launch_height = 14_000        # m
+    self.average_launch_cost = 580              # m/s
+    self.launch_loss_factor = launch(           # m/s
+        self, 
+        alt=self.standard_launch_height,
+        inc=0, 
+        calculate_losses=True)

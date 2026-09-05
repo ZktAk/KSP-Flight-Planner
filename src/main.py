@@ -3,32 +3,28 @@ from utils.import_bodies import *
 from models.antenna_models import *
 from CommNet import *
 from mission_presets import *
+from utils.kos_script_generator import generate_kos_script, save_kos_script
+
 
 if __name__ == "__main__":
 
-  mission = Mission(origin = Kerbin)
-  mission.Launch(80_000)
-  mission.Transfer(Minmus, 14_000, 14_000)
-  #mission = Munar_orbitor(355_291-Mun().radius, 567_834-Mun().radius)
-  # mission = Minmus_orbitor()
-  # mission.Change_Orbit(100_000, 100_000, 12)
-  # #mission.Launch()
-  # #mission.Transfer(Kerbin, 35_000, Minmus().a)
-  mission.print_maneuver_bill()
+  # mission = Mission(origin = Kerbin)
+  # mission.Launch(80_000)
+  # mission.Transfer(Minmus, 14_000, 14_000)
+  # mission.print_maneuver_bill()
 
-  #mission.print_power_bill(10)
+  # orbit = mission.complete()
+  # commNet = CommNet(tier=2)
 
-  orbit = mission.complete()
-  commNet = CommNet(tier=2)
+  # test_sat = Satellite(orbit, 0, commNet.DSN, comm_type='Direct')
+  # test_sat.add_antenna(Communotron_16)
+  # commNet.query_signal_strength(test_sat)
 
-  test_sat = Satellite(orbit, 0, commNet.DSN, comm_type='Direct')
-  test_sat.add_antenna(Communotron_16)
-  commNet.query_signal_strength(test_sat)
-  #commNet.add_satellite(test_sat)
+  # power_usage = Communotron_16.electricity * Communotron_16.speed
 
-  power_usage = Communotron_16.electricity * Communotron_16.speed
+  # mission.print_power_bill(power_usage)
 
-  mission.print_power_bill(power_usage)
+  # ------
 
   # mission = Duna_launch()
   # orbit = mission.complete()
@@ -53,3 +49,11 @@ if __name__ == "__main__":
   # commNet.add_satellite(test_sat)
   #
   # commNet.query_signal_strength(test_sat)
+
+
+
+
+  mission = Munar_orbitor()
+  kos_script = generate_kos_script(mission, spacecraft_mass=5.0, isp=320)
+  script_path = save_kos_script(kos_script, mission.name)
+  print(f"KoS script saved to: {script_path}")

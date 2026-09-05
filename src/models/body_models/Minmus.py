@@ -1,6 +1,7 @@
 from utils.body_registry import register_body, get_body
 from models.body_models.Base_Class import CelestialBody
 from utils.body_hierarchy import *
+from maneuvers.launch import launch
 from utils.body_math_utils import *
 import math
 
@@ -18,12 +19,7 @@ class Minmus(CelestialBody):
     self.mass = 2.6457580E+19                   # kg
     self.mu = 1.7658000E+9                      # m^3/s^2
     self.g = self.mu / pow(self.radius, 2)      # m/s^2
-    self.SOI = 2_247_428.4                      # m from center
-
-    # Atmospheric Properties
-    self.atm_height = 0                         # m
-    self.standard_launch_height = 10_000        # m
-    self.atm_delta_v = 0                        # m/s
+    self.SOI = 2_247_428.4                      # m from center    
 
     # Orbital parameters
     self.a = 47_000_000                         # m from center
@@ -52,3 +48,13 @@ class Minmus(CelestialBody):
              self.rotation_period,
              parent.period)
     self.rotation_speed = 9.3315                # m/s
+
+    # Atmospheric Properties
+    self.atm_height = 0                         # m
+    self.standard_launch_height = 10_000        # m
+    self.average_launch_cost = 180              # m/s
+    self.launch_loss_factor = launch(           # m/s
+        self, 
+        alt=self.standard_launch_height,
+        inc=0, 
+        calculate_losses=True)
