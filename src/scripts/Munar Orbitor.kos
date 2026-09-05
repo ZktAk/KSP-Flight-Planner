@@ -1,0 +1,111 @@
+// Generated KoS Script for Mission: Munar Orbitor
+// Generated on: 2026-09-05 16:34:08
+//
+
+// Mission parameters
+SET mission_name TO "Munar Orbitor".
+SET spacecraft_mass TO 5.0.
+SET engine_isp TO 320.
+
+// Launch sequence
+PRINT "Starting launch sequence from Kerbin".
+
+// Pre-launch checks
+LOCK THROTTLE TO 0.
+LOCK STEERING TO UP.
+WAIT 1.
+STAGE.
+WAIT 1.
+
+// Ascent profile: Linear pitch to 50° at 10km, then maintain 50°
+SET target_altitude TO 80000.
+SET ascent_complete TO FALSE.
+
+UNTIL ascent_complete {
+    SET current_alt TO ALTITUDE.
+    
+    // Calculate pitch based on altitude
+    IF current_alt < 10000 {
+        SET pitch TO 90 - (current_alt / 10000) * 40.
+    } ELSE {
+        SET pitch TO 50.
+    }
+    
+    LOCK STEERING TO HEADING(90, pitch).
+    
+    // Throttle control
+    IF current_alt < target_altitude - 1000 {
+        LOCK THROTTLE TO 1.
+    } ELSE {
+        LOCK THROTTLE TO 0.1.
+    }
+    
+    // Check for apoapsis near target
+    IF APOAPSIS > target_altitude - 500 AND APOAPSIS < target_altitude + 500 {
+        LOCK THROTTLE TO 0.
+        SET ascent_complete TO TRUE.
+    }
+    
+    WAIT 0.1.
+}
+
+PRINT "Ascent complete. Apoapsis: " + ROUND(APOAPSIS) + "m".
+
+// Coast to apoapsis and circularize
+WAIT UNTIL ETA:APOAPSIS < 30.
+LOCK STEERING TO PROGRADE.
+WAIT UNTIL ETA:APOAPSIS < 5.
+LOCK THROTTLE TO 1.
+WAIT UNTIL PERIAPSIS > target_altitude - 1000.
+LOCK THROTTLE TO 0.
+PRINT "Orbit achieved. Periapsis: " + ROUND(PERIAPSIS) + "m, Apoapsis: " + ROUND(APOAPSIS) + "m".
+
+// Transfer from Kerbin to The Mun
+PRINT "Transfer from Kerbin to The Mun".
+
+// Execute burn - works for most rockets
+WAIT UNTIL NEXTNODE:ETA < 60.
+LOCK STEERING TO NEXTNODE:DELTAV:DIRECTION.
+WAIT UNTIL NEXTNODE:ETA < 10.
+
+// Burn until delta-v is small
+LOCK THROTTLE TO 1.
+UNTIL NEXTNODE:DELTAV:MAG < 1 {
+    // Reduce throttle near end for precision
+    IF NEXTNODE:ETA < 1 AND NEXTNODE:DELTAV:MAG > 5 {
+        LOCK THROTTLE TO 0.1.
+    }
+    WAIT 0.1.
+}
+
+LOCK THROTTLE TO 0.
+UNLOCK STEERING.
+REMOVE NEXTNODE.
+PRINT "Transfer from Kerbin to The Mun completed".
+
+// Capture into 14,000m circular orbit around The Mun
+PRINT "Capture into 14,000m circular orbit around The Mun".
+
+// Execute burn - works for most rockets
+WAIT UNTIL NEXTNODE:ETA < 60.
+LOCK STEERING TO NEXTNODE:DELTAV:DIRECTION.
+WAIT UNTIL NEXTNODE:ETA < 10.
+
+// Burn until delta-v is small
+LOCK THROTTLE TO 1.
+UNTIL NEXTNODE:DELTAV:MAG < 1 {
+    // Reduce throttle near end for precision
+    IF NEXTNODE:ETA < 1 AND NEXTNODE:DELTAV:MAG > 5 {
+        LOCK THROTTLE TO 0.1.
+    }
+    WAIT 0.1.
+}
+
+LOCK THROTTLE TO 0.
+UNLOCK STEERING.
+REMOVE NEXTNODE.
+PRINT "Capture into 14,000m circular orbit around The Mun completed".
+
+
+// Mission complete
+PRINT "Mission Munar Orbitor completed successfully".
