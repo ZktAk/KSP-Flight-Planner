@@ -1,7 +1,4 @@
 # Default ignored files
-/shelf/
-/workspace.xml
-src/ToDo.py
 src/__pycache__/
 src/manual/__pycache__/
 src/models/__pycache__/
